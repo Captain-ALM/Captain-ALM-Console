@@ -234,7 +234,7 @@ namespace captainalm.calmcon.api
         /// Constructs a new command.
         /// </summary>
         /// <param name="_name">The name of the command.</param>
-        /// <param name="del">The delegate for the command using <seealso cref="captainalm.calmcon.api.types.Cmd">the Cmd delegate type</seealso>.</param>
+        /// <param name="del">The delegate for the command using <seealso cref="captainalm.calmcon.api.Types.Cmd">the Cmd delegate type</seealso>.</param>
         /// <param name="_help">The help string for the command.</param>
         /// <remarks></remarks>
         public Command(string _name, Types.Cmd del, string _help = "")

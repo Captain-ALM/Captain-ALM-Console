@@ -7,7 +7,7 @@ namespace captainalm.calmcmd
     /// <summary>
     /// Provides a registry for the API and applications.
     /// </summary>
-    public sealed class Registry
+    public static class Registry
     {
         private static List<ICommand> _commands = new List<ICommand>();
         private static List<ISyntax> _syntaxes = new List<ISyntax>();
@@ -94,6 +94,30 @@ namespace captainalm.calmcmd
             lock (slocksyntaxes)
             {
                 return _syntaxes.ToArray();
+            }
+        }
+        /// <summary>
+        /// Gets a command given its name via (owner.name)
+        /// </summary>
+        /// <param name="cmdIn">The command name in</param>
+        /// <returns>The command</returns>
+        public static ICommand getCommand(string cmdIn)
+        {
+            lock (slockcommands)
+            {
+                return _commands.Find(delegate(ICommand x) { return (x.owner + "." + x.name).Equals(cmdIn); });
+            }
+        }
+        /// <summary>
+        /// Gets a syntax given its name via (owner.name)
+        /// </summary>
+        /// <param name="synIn">The syntax name in</param>
+        /// <returns>The syntax</returns>
+        public static ISyntax getSyntax(string synIn)
+        {
+            lock (slocksyntaxes)
+            {
+                return _syntaxes.Find(delegate(ISyntax x) { return (x.owner + "." + x.name).Equals(synIn); });
             }
         }
 

@@ -40,6 +40,8 @@
     <Compile Include="Interfaces\ICommand.cs" />
     <Compile Include="Interfaces\ISyntax.cs" />
     <Compile Include="Interfaces\IName.cs" />
+    <Compile Include="Loader\Loader.cs" />
+    <Compile Include="Loader\ExtensionSetupMethodAttribute.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

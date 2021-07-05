@@ -104,7 +104,7 @@ namespace captainalm.calmcmd
         {
             lock (slockcommands)
             {
-                return _commands.Find(delegate(ICommand x) { return (x.owner + "." + x.name).Equals(cmdIn); });
+                return _commands.Find(delegate(ICommand x) { return NameComparer(x, cmdIn); });
             }
         }
         /// <summary>
@@ -116,13 +116,18 @@ namespace captainalm.calmcmd
         {
             lock (slocksyntaxes)
             {
-                return _syntaxes.Find(delegate(ISyntax x) { return (x.owner + "." + x.name).Equals(synIn); });
+                return _syntaxes.Find(delegate(ISyntax x) { return NameComparer(x, synIn); });
             }
         }
 
         private static bool NameComparer(IName x, IName y)
         {
            return (x.owner + "." + x.name).Equals(y.owner + "." + y.name);
+        }
+
+        private static bool NameComparer(IName x, string nom)
+        {
+            return ((x.owner.Equals("")) ? x.name : x.owner + "." + x.name).Equals(nom);
         }
     }
 }

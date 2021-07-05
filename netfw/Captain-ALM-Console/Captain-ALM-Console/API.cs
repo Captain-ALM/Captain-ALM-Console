@@ -109,7 +109,7 @@ namespace captainalm.calmcmd
             var sn = Registry.getSyntaxes();
             foreach (ISyntax c in sn)
             {
-                ls.Add(c.owner + "." + c.name);
+                ls.Add((c.owner.Equals("")) ? c.name : c.owner + "." + c.name);
             }
             return ls.ToArray();
         }
@@ -127,7 +127,7 @@ namespace captainalm.calmcmd
                 {
                     Processor.currentSyntax = st;
                 }
-                currentSyntaxName = st.owner + "." + st.name;
+                currentSyntaxName = (st.owner.Equals("")) ? st.name : st.owner + "." + st.name;
                 return true;
             }
             return false;

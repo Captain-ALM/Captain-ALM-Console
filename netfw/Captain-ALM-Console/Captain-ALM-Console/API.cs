@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace captainalm.calmcmd
 {
@@ -12,6 +13,8 @@ namespace captainalm.calmcmd
         internal static string currentSyntaxName;
         internal static Dictionary<string, string> StringVariableDictionary = new Dictionary<string, string>();
         private static Dictionary<string, object> VariableDictionary = new Dictionary<string, object>();
+        internal static string invalidCommandName = "invalid";
+
         /// <summary>
         /// Provides a delegate to be used by program events
         /// </summary>
@@ -20,10 +23,30 @@ namespace captainalm.calmcmd
         /// This event is raised when the console has started after all libraries have been loaded
         /// </summary>
         public static event ProgramEvent ConsoleStart;
+        internal static void InvokeConsoleStart()
+        {
+            try
+            {
+                var ev = ConsoleStart;
+                if (ev != null) ev.Invoke();
+            }
+            catch (ThreadAbortException ex) { throw ex; }
+            catch (Exception ex) { }
+        }
         /// <summary>
         /// This event is raised when the console is ending before it terminates
         /// </summary>
         public static event ProgramEvent ConsoleEnd;
+        internal static void InvokeConsoleEnd()
+        {
+            try
+            {
+                var ev = ConsoleEnd;
+                if (ev != null) ev.Invoke();
+            }
+            catch (ThreadAbortException ex) { throw ex; }
+            catch (Exception ex) { }
+        }
         /// <summary>
         /// Provides a delegate to be used before a command is executed
         /// </summary>
@@ -35,6 +58,17 @@ namespace captainalm.calmcmd
         /// This is not called for commands executed by <see cref="captainalm.calmcmd.Processor.executeCommand">execute command</see>.
         /// </summary>
         public static event PreCommandExecute ConsolePreCommand;
+        internal static bool InvokeConsolePreCommand(string cmdln)
+        {
+            try
+            {
+                var ev = ConsolePreCommand;
+                if (ev != null) return ev.Invoke(cmdln);
+            }
+            catch (ThreadAbortException ex) { throw ex; }
+            catch (Exception ex) { }
+            return true; //Carry on executing the command on an exception
+        }
         /// <summary>
         /// Provides a delegate to be used after a command is executed
         /// </summary>
@@ -46,6 +80,17 @@ namespace captainalm.calmcmd
         /// This is not called for commands executed by <see cref="captainalm.calmcmd.Processor.executeCommand">execute command</see>.
         /// </summary>
         public static event PostCommandExecute ConsolePostCommand;
+        internal static void InvokeConsolePostCommand(string cmdln, object objOut)
+        {
+            try
+            {
+                var ev = ConsolePostCommand;
+                if (ev != null) ev.Invoke(cmdln, objOut);
+            }
+            catch (ThreadAbortException ex) { throw ex; }
+            catch (Exception ex) { }
+        }
+
         /// <summary>
         /// Gets the current syntax name (in the form owner.name)
         /// </summary>
@@ -87,6 +132,7 @@ namespace captainalm.calmcmd
             }
             return false;
         }
+
         /// <summary>
         /// Sets a value of the string variable storage system
         /// </summary>
@@ -123,6 +169,7 @@ namespace captainalm.calmcmd
         {
             StringVariableDictionary.Clear();
         }
+
         /// <summary>
         /// Sets a value of the object variable storage system
         /// </summary>
@@ -158,6 +205,17 @@ namespace captainalm.calmcmd
         public static void clearVariables()
         {
             VariableDictionary.Clear();
+        }
+
+        /// <summary>
+        /// Gets the name of the invalid command
+        /// </summary>
+        public static string invalidCommand
+        {
+            get
+            {
+                return invalidCommandName;
+            }
         }
     }
 }

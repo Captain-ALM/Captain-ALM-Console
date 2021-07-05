@@ -44,7 +44,7 @@ namespace captainalm.calmcmd
         public static object executeCommand(string cmdstr)
         {
             if (object.ReferenceEquals(currentSyntax, null)) return cmdstr;
-            var com = "";
+            var com = API.invalidCommand;
             var args = new string[0];
             if (currentSyntax.decode(cmdstr, ref com, ref args))
             {
@@ -77,6 +77,7 @@ namespace captainalm.calmcmd
         /// <param name="keepExecuting">A reference to keep executing</param>
         public static void executeCommands(ref bool keepExecuting)
         {
+            API.InvokeConsoleStart();
             while (keepExecuting)
             {
                 try
@@ -84,21 +85,25 @@ namespace captainalm.calmcmd
                     Thread.Sleep(125);
                     while (CommandStack.Count > 0)
                     {
-                        var cmdln = "";
+                        var cmdln = API.invalidCommand;
                         var cs = StatusUpdate;
                         if (cs != null) cs.Invoke(CommandStack.Count);
                         lock (slockCommandStack)
                         {
                             cmdln = CommandStack.Pop();
                         }
-                        try
+                        if (API.InvokeConsolePreCommand(cmdln))
                         {
-                            object toret = executeCommand(cmdln);
-                            var c = CommandOutput;
-                            if (c != null) c.Invoke(toret);
+                            try
+                            {
+                                object toret = executeCommand(cmdln);
+                                var c = CommandOutput;
+                                API.InvokeConsolePostCommand(cmdln, toret);
+                                if (c != null) c.Invoke(toret);
+                            }
+                            catch (ThreadAbortException ex) { throw ex; }
+                            catch (Exception ex) { var c = CommandError; if (c != null) c.Invoke(ex); }
                         }
-                        catch (ThreadAbortException ex) { throw ex; }
-                        catch (Exception ex) { var c = CommandError; if (c != null) c.Invoke(ex); }
                         cs = StatusUpdate;
                         if (cs != null) cs.Invoke(CommandStack.Count);
                     }
@@ -106,6 +111,7 @@ namespace captainalm.calmcmd
                 catch (ThreadAbortException ex) { throw ex; }
                 catch (Exception ex) { }
             }
+            API.InvokeConsoleEnd();
         }
     }
 }

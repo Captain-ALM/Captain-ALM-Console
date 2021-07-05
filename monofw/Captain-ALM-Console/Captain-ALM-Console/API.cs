@@ -134,6 +134,21 @@ namespace captainalm.calmcmd
         }
 
         /// <summary>
+        /// Gets an array of the current registered command names (each in the form owner.name)
+        /// </summary>
+        /// <returns>An array of command names</returns>
+        public static string[] getCommands()
+        {
+            var ls = new List<string>();
+            var sn = Registry.getCommands();
+            foreach (ICommand c in sn)
+            {
+                ls.Add((c.owner.Equals("")) ? c.name : c.owner + "." + c.name);
+            }
+            return ls.ToArray();
+        }
+
+        /// <summary>
         /// Sets a value of the string variable storage system
         /// </summary>
         /// <param name="name">The name of the variable</param>

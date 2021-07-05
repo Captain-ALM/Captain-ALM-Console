@@ -9,15 +9,12 @@ namespace captainalm.calmcmd
     /// </summary>
     public static class Processor
     {
-        internal static string currentSyntaxName;
         internal static ISyntax currentSyntax;
         internal static object slockCommandStack = new object();
         internal static Stack<string> CommandStack = new Stack<string>();
-        internal static Dictionary<string, string> StringVariableDictionary = new Dictionary<string, string>();
-        internal static Dictionary<string, object> VariableDictionary = new Dictionary<string, object>();
 
         /// <summary>
-        /// Provides a delegate for a to return an object from an executed command
+        /// Provides a delegate to return an object from an executed command
         /// </summary>
         /// <param name="objOut">The returned object</param>
         public delegate void CommandReturner(object objOut);
@@ -29,6 +26,15 @@ namespace captainalm.calmcmd
         /// This event is raised when a command fails execution
         /// </summary>
         public static event CommandReturner CommandError;
+        /// <summary>
+        /// Provides a delegate to return then status of the command remaing count 
+        /// </summary>
+        /// <param name="commandsRemainingOut">The number of commands remaining</param>
+        public delegate void StatusReturner(int commandsRemainingOut);
+        /// <summary>
+        /// This event is raised when the commands remaining is updated
+        /// </summary>
+        public static event StatusReturner StatusUpdate;
 
         /// <summary>
         /// Executes the given command string using the current syntax
@@ -79,6 +85,8 @@ namespace captainalm.calmcmd
                     while (CommandStack.Count > 0)
                     {
                         var cmdln = "";
+                        var cs = StatusUpdate;
+                        if (cs != null) cs.Invoke(CommandStack.Count);
                         lock (slockCommandStack)
                         {
                             cmdln = CommandStack.Pop();
@@ -91,6 +99,8 @@ namespace captainalm.calmcmd
                         }
                         catch (ThreadAbortException ex) { throw ex; }
                         catch (Exception ex) { var c = CommandError; if (c != null) c.Invoke(ex); }
+                        cs = StatusUpdate;
+                        if (cs != null) cs.Invoke(CommandStack.Count);
                     }
                 }
                 catch (ThreadAbortException ex) { throw ex; }

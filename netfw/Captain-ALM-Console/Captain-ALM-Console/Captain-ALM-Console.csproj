@@ -40,6 +40,8 @@
     <Compile Include="Interfaces\ICommand.cs" />
     <Compile Include="Interfaces\IName.cs" />
     <Compile Include="Interfaces\ISyntax.cs" />
+    <Compile Include="Loader\ExtensionSetupMethodAttribute.cs" />
+    <Compile Include="Loader\Loader.cs" />
     <Compile Include="Processor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Registry.cs" />

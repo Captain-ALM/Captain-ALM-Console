@@ -97,7 +97,7 @@ namespace captainalm.calmcmd
             }
         }
         /// <summary>
-        /// Gets a command given its name via (owner.name)
+        /// Gets a command given its name (in the form owner.name)
         /// </summary>
         /// <param name="cmdIn">The command name in</param>
         /// <returns>The command</returns>
@@ -109,7 +109,7 @@ namespace captainalm.calmcmd
             }
         }
         /// <summary>
-        /// Gets a syntax given its name via (owner.name)
+        /// Gets a syntax given its name (in the form owner.name)
         /// </summary>
         /// <param name="synIn">The syntax name in</param>
         /// <returns>The syntax</returns>

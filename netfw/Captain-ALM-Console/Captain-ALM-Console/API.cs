@@ -13,7 +13,7 @@ namespace captainalm.calmcmd
         internal static string currentSyntaxName;
         internal static Dictionary<string, string> StringVariableDictionary = new Dictionary<string, string>();
         private static Dictionary<string, object> VariableDictionary = new Dictionary<string, object>();
-        internal static string invalidCommandName = "invalid";
+        internal static string _invalidCommandName = "invalid";
 
         /// <summary>
         /// Provides a delegate to be used by program events
@@ -225,11 +225,21 @@ namespace captainalm.calmcmd
         /// <summary>
         /// Gets the name of the invalid command
         /// </summary>
-        public static string invalidCommand
+        public static string invalidCommandName
         {
             get
             {
-                return invalidCommandName;
+                return _invalidCommandName;
+            }
+        }
+        /// <summary>
+        /// Gets the invalid command
+        /// </summary>
+        public static ICommand invalidCommand
+        {
+            get
+            {
+                return Registry.getCommand(_invalidCommandName);
             }
         }
     }

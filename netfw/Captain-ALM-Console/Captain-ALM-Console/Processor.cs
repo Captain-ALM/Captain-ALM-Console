@@ -44,15 +44,15 @@ namespace captainalm.calmcmd
         public static object executeCommand(string cmdstr)
         {
             if (object.ReferenceEquals(currentSyntax, null)) return cmdstr;
-            var com = API.invalidCommand;
+            var com = API.invalidCommandName;
             var args = new string[0];
             if (currentSyntax.decode(cmdstr, ref com, ref args))
             {
+                ICommand cmd = Registry.getCommand(com);
+                if (object.ReferenceEquals(cmd, null)) return API.invalidCommand.run(new object[0]);
                 if (object.ReferenceEquals(args, null)) args = new string[0];
                 var argsp = new object[args.Length];
                 for (int i = 0; i < args.Length; i++) argsp[i] = executeCommand(args[i]);
-                ICommand cmd = Registry.getCommand(com);
-                if (object.ReferenceEquals(cmd, null)) return currentSyntax.argumentTypeConversion(cmdstr);
                 return cmd.run(argsp);
             }
             else
@@ -85,7 +85,7 @@ namespace captainalm.calmcmd
                     Thread.Sleep(125);
                     while (CommandStack.Count > 0)
                     {
-                        var cmdln = API.invalidCommand;
+                        var cmdln = API.invalidCommandName;
                         var cs = StatusUpdate;
                         if (cs != null) cs.Invoke(CommandStack.Count);
                         lock (slockCommandStack)

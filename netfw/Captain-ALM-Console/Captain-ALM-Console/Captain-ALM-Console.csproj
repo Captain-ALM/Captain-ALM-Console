@@ -40,11 +40,20 @@
     <Compile Include="Interfaces\ICommand.cs" />
     <Compile Include="Interfaces\IName.cs" />
     <Compile Include="Interfaces\ISyntax.cs" />
+    <Compile Include="Interfaces\Wrappers\Command.cs" />
+    <Compile Include="Interfaces\Wrappers\Name.cs" />
     <Compile Include="Loader\ExtensionSetupMethodAttribute.cs" />
+    <Compile Include="Loader\LegacyLoader.cs" />
     <Compile Include="Loader\Loader.cs" />
     <Compile Include="Processor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Registry.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\cnshare\cnshare.csproj">
+      <Project>{7f795528-ecc1-4e5d-9d2e-4244db690e4d}</Project>
+      <Name>cnshare</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

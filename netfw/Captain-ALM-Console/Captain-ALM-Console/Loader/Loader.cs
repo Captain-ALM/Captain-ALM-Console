@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 
@@ -38,12 +37,15 @@ namespace captainalm.calmcmd
                 foreach (MethodInfo c in typeIn.GetMethods(BindingFlags.Public | BindingFlags.Static))
                 {
                     ExtensionSetupMethodAttribute[] aarr = (ExtensionSetupMethodAttribute[])c.GetCustomAttributes(typeof(ExtensionSetupMethodAttribute), false);
-                    if (aarr.Length != 0) { initMethod = c; isInstanceMethod = false; }
+                    if (aarr.Length != 0) { initMethod = c; isInstanceMethod = false; break; }
                 }
-                foreach (MethodInfo c in typeIn.GetMethods(BindingFlags.Public | BindingFlags.Instance))
+                if (object.ReferenceEquals(initMethod, null))
                 {
-                    ExtensionSetupMethodAttribute[] aarr = (ExtensionSetupMethodAttribute[])c.GetCustomAttributes(typeof(ExtensionSetupMethodAttribute), false);
-                    if (aarr.Length != 0) { initMethod = c; isInstanceMethod = true; }
+                    foreach (MethodInfo c in typeIn.GetMethods(BindingFlags.Public | BindingFlags.Instance))
+                    {
+                        ExtensionSetupMethodAttribute[] aarr = (ExtensionSetupMethodAttribute[])c.GetCustomAttributes(typeof(ExtensionSetupMethodAttribute), false);
+                        if (aarr.Length != 0) { initMethod = c; isInstanceMethod = true; break; }
+                    }
                 }
             }
             catch (ThreadAbortException ex) { throw ex; }

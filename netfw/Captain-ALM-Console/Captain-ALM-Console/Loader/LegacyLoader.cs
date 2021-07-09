@@ -10,6 +10,15 @@ namespace captainalm.calmcmd
         public LegacyHookHolder hookHolder = new LegacyHookHolder();
         public bool registerFirstLegacySyntaxesToStandardLibrary = true;
         public bool registerFirstLegacyCommandsToStandardLibrary = true;
+        //Previous values of the manipulator during the last check:
+        private Stack<string> OldCommandStack;
+        private Dictionary<string, string> OldVariableDictionary;
+        private string OldSyntaxMode;
+        //Previous values of the manipulator data stored by the new system during the last check:
+        private Stack<string> OldNewCommandStack;
+        private Dictionary<string, string> OldNewVariableDictionary;
+        private string OldNewSyntaxMode;
+        private object slocksmv = new object();
 
         public bool loadAssembly(Assembly assemblyIn)
         {
@@ -23,6 +32,93 @@ namespace captainalm.calmcmd
                 }
             }
             return toret;
+        }
+
+        public void syncManipulatorValues()
+        {
+            lock (slocksmv) lock (Processor.slockCommandStack) lock (API.slocksvd)
+            {
+                makeSureNewManipulatorNotNull();
+                makeSureManipulatorNotNull();
+                makeSureSavedNotNull();
+                makeSureNewSavedNotNull();
+                //For each, check if the two values are different, then:
+                //Check the old vs new values for each and the one that differs and not null gets selected
+                //Instead of testing for null in the unsafe (volatile) legacy manipulator environment, auto set the value in a local variable before testing for null
+                //If both differ or legacy was null, prefer the new system value (Which should never be null)
+                if (!object.ReferenceEquals(captainalm.calmcon.api.Manipulator.CommandStack, Processor.CommandStack))
+                {
+                    Stack<string> lh = captainalm.calmcon.api.Manipulator.CommandStack;
+                    if ((!object.ReferenceEquals(lh, OldCommandStack)) && object.ReferenceEquals(Processor.CommandStack, OldNewCommandStack) && (!object.ReferenceEquals(lh, null)))
+                    {
+                        Processor.CommandStack = lh;
+                    }
+                    else
+                    {
+                        captainalm.calmcon.api.Manipulator.CommandStack = Processor.CommandStack;
+                    }
+                }
+                if (!object.ReferenceEquals(captainalm.calmcon.api.Manipulator.SyntaxMode, API.getCurrentSyntax()))
+                {
+                    string lh = captainalm.calmcon.api.Manipulator.SyntaxMode;
+                    if ((!object.ReferenceEquals(lh, OldSyntaxMode)) && object.ReferenceEquals(API.getCurrentSyntax(), OldNewSyntaxMode) && (!object.ReferenceEquals(lh, null)))
+                    {
+                        API.setSyntax(lh);
+                    }
+                    else
+                    {
+                        captainalm.calmcon.api.Manipulator.SyntaxMode = API.getCurrentSyntax();
+                    }
+                }
+                if (!object.ReferenceEquals(captainalm.calmcon.api.Manipulator.VariableDictionary, API.StringVariableDictionary))
+                {
+                    Dictionary<string, string> lh = captainalm.calmcon.api.Manipulator.VariableDictionary;
+                    if ((!object.ReferenceEquals(lh, OldVariableDictionary)) && object.ReferenceEquals(API.StringVariableDictionary, OldNewVariableDictionary) && (!object.ReferenceEquals(lh, null)))
+                    {
+                        API.StringVariableDictionary = lh;
+                    }
+                    else
+                    {
+                        captainalm.calmcon.api.Manipulator.VariableDictionary = API.StringVariableDictionary;
+                    }
+                }
+                //Set up old values
+                OldCommandStack = captainalm.calmcon.api.Manipulator.CommandStack;
+                OldSyntaxMode = captainalm.calmcon.api.Manipulator.SyntaxMode;
+                OldVariableDictionary = captainalm.calmcon.api.Manipulator.VariableDictionary;
+                OldNewCommandStack = Processor.CommandStack;
+                OldNewSyntaxMode = API.getCurrentSyntax();
+                OldNewVariableDictionary = API.StringVariableDictionary;
+            }
+        }
+        //INFO: Make sure subs have been synclocked for local in the syncManipulatorValues and should only be called from <-
+        //These use the values of the new system
+        private void makeSureManipulatorNotNull()
+        {
+            if (object.ReferenceEquals(captainalm.calmcon.api.Manipulator.CommandStack, null)) captainalm.calmcon.api.Manipulator.CommandStack = Processor.CommandStack;
+            if (object.ReferenceEquals(captainalm.calmcon.api.Manipulator.SyntaxMode, null)) captainalm.calmcon.api.Manipulator.SyntaxMode = API.getCurrentSyntax();
+            if (object.ReferenceEquals(captainalm.calmcon.api.Manipulator.VariableDictionary, null)) captainalm.calmcon.api.Manipulator.VariableDictionary = API.StringVariableDictionary;
+        }
+        //These should always be not null
+        private void makeSureNewManipulatorNotNull()
+        {
+            if (object.ReferenceEquals(Processor.CommandStack, null)) Processor.CommandStack = new Stack<string>();
+            if (object.ReferenceEquals(API.getCurrentSyntax(), null)) API.setSyntax("");
+            if (object.ReferenceEquals(API.StringVariableDictionary, null)) API.StringVariableDictionary = new Dictionary<string,string>();
+        }
+        //Hopefully makes not null by copying the values from the new system
+        private void makeSureSavedNotNull()
+        {
+            if (object.ReferenceEquals(OldCommandStack, null)) OldCommandStack = Processor.CommandStack;
+            if (object.ReferenceEquals(OldSyntaxMode, null)) OldSyntaxMode = API.getCurrentSyntax();
+            if (object.ReferenceEquals(OldVariableDictionary, null)) OldVariableDictionary = API.StringVariableDictionary;
+        }
+        //Hopefully makes not null by copying the values from the respective source
+        private void makeSureNewSavedNotNull()
+        {
+            if (object.ReferenceEquals(OldNewCommandStack, null)) OldNewCommandStack = Processor.CommandStack;
+            if (object.ReferenceEquals(OldNewSyntaxMode, null)) OldNewSyntaxMode = API.getCurrentSyntax();
+            if (object.ReferenceEquals(OldNewVariableDictionary, null)) OldNewVariableDictionary = API.StringVariableDictionary;
         }
 
         private bool typeProcessor(Type typeIn)

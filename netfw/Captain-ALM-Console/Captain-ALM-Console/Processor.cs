@@ -43,10 +43,18 @@ namespace captainalm.calmcmd
         /// <returns>The result of the command</returns>
         public static object executeCommand(string cmdstr)
         {
-            if (object.ReferenceEquals(currentSyntax, null)) return cmdstr;
+            lock (API.slocksyntax)
+            {
+                if (object.ReferenceEquals(currentSyntax, null)) return cmdstr;
+            }
             var com = API.invalidCommandName;
             var args = new string[0];
-            if (currentSyntax.decode(cmdstr, ref com, ref args))
+            var dr = false;
+            lock (API.slocksyntax)
+            {
+                dr = currentSyntax.decode(cmdstr, ref com, ref args);
+            }
+            if (dr)
             {
                 ICommand cmd = Registry.getCommand(com);
                 if (object.ReferenceEquals(cmd, null)) return API.invalidCommand.run(new object[0]);
@@ -57,7 +65,10 @@ namespace captainalm.calmcmd
             }
             else
             {
-                return currentSyntax.argumentTypeConversion(cmdstr);
+                lock (API.slocksyntax)
+                {
+                    return currentSyntax.argumentTypeConversion(cmdstr);
+                }
             }
         }
         /// <summary>

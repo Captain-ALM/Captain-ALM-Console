@@ -9,9 +9,10 @@ namespace captainalm.calmcmd
     /// </summary>
     public static class API
     {
-        private static object slockssyntax = new object();
-        internal static string currentSyntaxName;
+        internal static object slocksyntax = new object();
+        internal static string currentSyntaxName = "";
         internal static Dictionary<string, string> StringVariableDictionary = new Dictionary<string, string>();
+        internal static object slocksvd = new object();
         private static Dictionary<string, object> VariableDictionary = new Dictionary<string, object>();
         internal static string _invalidCommandName = "invalid";
 
@@ -120,14 +121,23 @@ namespace captainalm.calmcmd
         /// <returns>If the operation completed</returns>
         public static bool setSyntax(string nameIn)
         {
+            if (nameIn.Equals(""))
+            {
+                lock (slocksyntax)
+                {
+                    Processor.currentSyntax = null;
+                }
+                currentSyntaxName = nameIn;
+                return true;
+            }
             ISyntax st = Registry.getSyntax(nameIn);
             if (st != null)
             {
-                lock (slockssyntax)
+                lock (slocksyntax)
                 {
                     Processor.currentSyntax = st;
                 }
-                currentSyntaxName = (st.owner.Equals("")) ? st.name : st.owner + "." + st.name;
+                currentSyntaxName = nameIn;
                 return true;
             }
             return false;
@@ -155,13 +165,16 @@ namespace captainalm.calmcmd
         /// <param name="valueIn">The value to store</param>
         public static void setStringVariable(string name, string valueIn)
         {
-            if (StringVariableDictionary.ContainsKey(name)) 
+            lock (slocksvd)
             {
-                StringVariableDictionary[name] = valueIn;
-            }
-            else
-            {
-                StringVariableDictionary.Add(name, valueIn);
+                if (StringVariableDictionary.ContainsKey(name))
+                {
+                    StringVariableDictionary[name] = valueIn;
+                }
+                else
+                {
+                    StringVariableDictionary.Add(name, valueIn);
+                }
             }
         }
         /// <summary>
@@ -171,9 +184,12 @@ namespace captainalm.calmcmd
         /// <returns>The value obtained</returns>
         public static string getStringVariable(string name)
         {
-            if (StringVariableDictionary.ContainsKey(name))
+            lock (slocksvd)
             {
-                return StringVariableDictionary[name];
+                if (StringVariableDictionary.ContainsKey(name))
+                {
+                    return StringVariableDictionary[name];
+                }
             }
             return "";
         }
@@ -182,7 +198,10 @@ namespace captainalm.calmcmd
         /// </summary>
         public static void clearStringVariables()
         {
-            StringVariableDictionary.Clear();
+            lock (slocksvd)
+            {
+                StringVariableDictionary.Clear();
+            }
         }
 
         /// <summary>

@@ -14,6 +14,7 @@ namespace captainalm.calmcmd
         internal static Dictionary<string, string> StringVariableDictionary = new Dictionary<string, string>();
         internal static object slocksvd = new object();
         private static Dictionary<string, object> VariableDictionary = new Dictionary<string, object>();
+        private static object slockvd = new object();
         internal static string _invalidCommandName = "invalid";
 
         /// <summary>
@@ -211,13 +212,16 @@ namespace captainalm.calmcmd
         /// <param name="valueIn">The value to store</param>
         public static void setVariable(string name, object valueIn)
         {
-            if (VariableDictionary.ContainsKey(name))
+            lock (slockvd)
             {
-                VariableDictionary[name] = valueIn;
-            }
-            else
-            {
-                VariableDictionary.Add(name, valueIn);
+                if (VariableDictionary.ContainsKey(name))
+                {
+                    VariableDictionary[name] = valueIn;
+                }
+                else
+                {
+                    VariableDictionary.Add(name, valueIn);
+                }
             }
         }
         /// <summary>
@@ -227,9 +231,12 @@ namespace captainalm.calmcmd
         /// <returns>The value obtained</returns>
         public static object getVariable(string name)
         {
-            if (VariableDictionary.ContainsKey(name))
+            lock (slockvd)
             {
-                return VariableDictionary[name];
+                if (VariableDictionary.ContainsKey(name))
+                {
+                    return VariableDictionary[name];
+                }
             }
             return null;
         }
@@ -238,7 +245,10 @@ namespace captainalm.calmcmd
         /// </summary>
         public static void clearVariables()
         {
-            VariableDictionary.Clear();
+            lock (slockvd)
+            {
+                VariableDictionary.Clear();
+            }
         }
 
         /// <summary>

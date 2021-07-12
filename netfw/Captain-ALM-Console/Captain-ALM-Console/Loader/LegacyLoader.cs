@@ -8,6 +8,7 @@ namespace captainalm.calmcmd
     internal sealed class LegacyLoader
     {
         public LegacyHookHolder hookHolder = new LegacyHookHolder();
+        public LegacyHookRunnerHolder hookRunnerHolder;
         public bool registerFirstLegacySyntaxesToStandardLibrary = true;
         public bool registerFirstLegacyCommandsToStandardLibrary = true;
         //Previous values of the manipulator during the last check:
@@ -19,6 +20,144 @@ namespace captainalm.calmcmd
         private Dictionary<string, string> OldNewVariableDictionary;
         private string OldNewSyntaxMode;
         private object slocksmv = new object();
+        //Define external command and syntax registry:
+        private Dictionary<int, LegacyCommand> ecmdreg = new Dictionary<int, LegacyCommand>();
+        private Dictionary<int, LegacySyntax> esnxreg = new Dictionary<int,LegacySyntax>();
+        private int ecmdregk = 0;
+        private int esnxregk = 0;
+        private object slockecmdreg = new object();
+        private object slockesnxreg = new object();
+        private object slockecmdregk = new object();
+        private object slockesnxregk = new object();
+        //Define the legacy hooks
+        private captainalm.calmcon.api.Types.RunCommandHook runcommandhook;
+        private captainalm.calmcon.api.Types.AddExternalCommandHook addecmdhook;
+        private captainalm.calmcon.api.Types.AddExternalSyntaxHook addesnxhook;
+        private captainalm.calmcon.api.Types.RemoveExternalCommandHook remecmdhook;
+        private captainalm.calmcon.api.Types.RemoveExternalSyntaxHook remesnxhook;
+        private captainalm.calmcon.api.Types.ListExternalCommandsHook lsecmdhook;
+        private captainalm.calmcon.api.Types.ListExternalSyntaxesHook lsesnxhook;
+
+        //Checks if the legacy system is actually supported:
+        public static bool legacySupported()
+        {
+            return new captainalm.calmcon.api.LibrarySetup().GetType() == typeof(captainalm.calmcon.api.LibrarySetup);
+        }
+
+        //Constructor:
+        public LegacyLoader()
+        {
+            runcommandhook = delegate(string c, string[] a)
+            {
+                ICommand cmd = Registry.getCommand(c);
+                if (object.ReferenceEquals(cmd, null)) cmd = API.invalidCommand;
+                var ts = new object[a.Length];
+                if (a.Length > 0)
+                {
+                    for (int i = 0; i < a.Length; i++)
+                    {
+                        ts[i] = a[i];
+                    }
+                }
+                object toret = cmd.run(ts);
+                if (object.ReferenceEquals(toret, null)) return "";
+                if (toret.GetType() == typeof(string)) return (string)toret;
+                if (toret.GetType() == typeof(captainalm.calmcon.api.OutputText)) return (captainalm.calmcon.api.OutputText)toret;
+                return toret.ToString();
+            };
+            addecmdhook = delegate(string l, captainalm.calmcon.api.Command c)
+            {
+                var k = setupNextKey(ref ecmdregk, ref slockecmdregk);
+                if (k != 0)
+                {
+                    lock (slockecmdreg)
+                    {
+                        ecmdreg.Add(k, new LegacyCommand(c, l));
+                        try
+                        {
+                            Registry.registerCommand(ecmdreg[k]);
+                        }
+                        catch (CaptainALMConsoleException e)
+                        {
+                            ecmdreg.Remove(k);
+                            throw new Exception("Command Already Exists!");
+                        }
+                    }
+                }
+                return k;
+            };
+            addesnxhook = delegate(string l, captainalm.calmcon.api.ISyntax s)
+            {
+                var k = setupNextKey(ref esnxregk, ref slockesnxregk);
+                if (k != 0)
+                {
+                    lock (slockesnxreg)
+                    {
+                        esnxreg.Add(k, new LegacySyntax(s, l));
+                        try
+                        {
+                            Registry.registerSyntax(esnxreg[k]);
+                        }
+                        catch (CaptainALMConsoleException e)
+                        {
+                            esnxreg.Remove(k);
+                            throw new Exception("Syntax Already Exists!");
+                        }
+                    }
+                }
+                return k;
+            };
+            remecmdhook = delegate(string l, int id)
+            {
+                lock (slockecmdreg)
+                {
+                    if (ecmdreg.ContainsKey(id) && ecmdreg[id].owner.Equals(l))
+                    {
+                        Registry.removeCommand(ecmdreg[id]);
+                        ecmdreg.Remove(id);
+                        return true;
+                    }
+                }
+                return false;
+            };
+            remesnxhook = delegate(string l, int id)
+            {
+                lock (slockesnxreg)
+                {
+                    if (esnxreg.ContainsKey(id) && esnxreg[id].owner.Equals(l))
+                    {
+                        Registry.removeSyntax(esnxreg[id]);
+                        esnxreg.Remove(id);
+                        return true;
+                    }
+                }
+                return false;
+            };
+            lsecmdhook = delegate(string l)
+            {
+                var toret = new List<string>();
+                lock (slockecmdreg)
+                {
+                    foreach (int c in ecmdreg.Keys)
+                    {
+                        if (ecmdreg[c].owner.Equals(l)) toret.Add(c.ToString() + " : " + ecmdreg[c].name);
+                    }
+                }
+                return toret.ToArray();
+            };
+            lsesnxhook = delegate(string l)
+            {
+                var toret = new List<string>();
+                lock (slockesnxreg)
+                {
+                    foreach (int c in esnxreg.Keys)
+                    {
+                        if (esnxreg[c].owner.Equals(l)) toret.Add(c.ToString() + " : " + esnxreg[c].name);
+                    }
+                }
+                return toret.ToArray();
+            };
+        }
 
         public bool loadAssembly(Assembly assemblyIn)
         {
@@ -32,6 +171,57 @@ namespace captainalm.calmcmd
                 }
             }
             return toret;
+        }
+
+        public void executeStartHooks()
+        {
+            foreach (string t in hookHolder.hookInformation.Keys)
+            {
+                var c = hookHolder.hookInformation[t];
+                var v = (LegacyHookHolder)hookHolder.Clone();
+                v.libraryNameFFA = t;
+                if (!object.ReferenceEquals(c.hook_runcommand, null)) c.hook_runcommand.Invoke(ref runcommandhook);
+                if (!object.ReferenceEquals(c.hook_readoutput, null)) if (!object.ReferenceEquals(hookRunnerHolder.GetReadOutputHook, null)) hookRunnerHolder.GetReadOutputHook.Invoke(v);
+                if (!object.ReferenceEquals(c.hook_writeoutput, null)) if (!object.ReferenceEquals(hookRunnerHolder.GetWriteOutputHook, null)) hookRunnerHolder.GetWriteOutputHook.Invoke(v);
+                if (!object.ReferenceEquals(c.hook_e_cmd_add, null)) c.hook_e_cmd_add.Invoke(ref addecmdhook);
+                if (!object.ReferenceEquals(c.hook_e_cmd_list, null)) c.hook_e_cmd_list.Invoke(ref lsecmdhook);
+                if (!object.ReferenceEquals(c.hook_e_cmd_remove, null)) c.hook_e_cmd_remove.Invoke(ref remecmdhook);
+                if (!object.ReferenceEquals(c.hook_e_snx_add, null)) c.hook_e_snx_add.Invoke(ref addesnxhook);
+                if (!object.ReferenceEquals(c.hook_e_snx_list, null)) c.hook_e_snx_list.Invoke(ref lsesnxhook);
+                if (!object.ReferenceEquals(c.hook_e_snx_remove, null)) c.hook_e_snx_remove.Invoke(ref remesnxhook);
+                if (!object.ReferenceEquals(c.hook_form, null)) if (!object.ReferenceEquals(hookRunnerHolder.FormHook, null)) hookRunnerHolder.FormHook.Invoke(v);
+                if (!object.ReferenceEquals(c.hook_cmd_txtbx, null)) if (!object.ReferenceEquals(hookRunnerHolder.CommandTextboxHook, null)) hookRunnerHolder.CommandTextboxHook.Invoke(v);
+                if (!object.ReferenceEquals(c.hook_out_txtbx, null)) if (!object.ReferenceEquals(hookRunnerHolder.OutputTextboxHook, null)) hookRunnerHolder.OutputTextboxHook.Invoke(v);
+                if (!object.ReferenceEquals(c.hook_programstart, null)) c.hook_programstart.Invoke();
+            }
+        }
+
+        public void executeEndHook()
+        {
+            foreach (string t in hookHolder.hookInformation.Keys)
+            {
+                var c = hookHolder.hookInformation[t];
+                if (!object.ReferenceEquals(c.hook_programstop, null)) c.hook_programstop.Invoke();
+            }
+        }
+
+        public bool executePreCHook(string cmdln)
+        {
+            foreach (string t in hookHolder.hookInformation.Keys)
+            {
+                var c = hookHolder.hookInformation[t];
+                if (!object.ReferenceEquals(c.hook_command_preexecute, null)) c.hook_command_preexecute.Invoke(cmdln);
+            }
+            return true;
+        }
+
+        public void executePostCHook(string cmdln, object objOut)
+        {
+            foreach (string t in hookHolder.hookInformation.Keys)
+            {
+                var c = hookHolder.hookInformation[t];
+                if (!object.ReferenceEquals(c.hook_command_postexecute, null)) c.hook_command_postexecute.Invoke(cmdln, object.ReferenceEquals(objOut, null) ? new captainalm.calmcon.api.OutputText() : (objOut.GetType() == typeof(string) ? new captainalm.calmcon.api.OutputText((string)objOut) : (objOut.GetType() == typeof(captainalm.calmcon.api.OutputText) ? (captainalm.calmcon.api.OutputText)objOut : new captainalm.calmcon.api.OutputText(objOut.ToString()))));
+            }
         }
 
         public void syncManipulatorValues()
@@ -175,100 +365,20 @@ namespace captainalm.calmcmd
             }
             return true;
         }
-    }
-    /// <summary>
-    /// Holds the hook database of the legacy loader for 'safer' external use.
-    /// </summary>
-    public sealed class LegacyHookHolder
-    {
-        /// <summary>
-        /// The hook information dictionary
-        /// </summary>
-        public readonly Dictionary<String, captainalm.calmcon.api.HookInfo> hookInformation = new Dictionary<string, captainalm.calmcon.api.HookInfo>();
-    }
 
-    internal sealed class LegacySyntax : ISyntax
-    {
-        public captainalm.calmcon.api.ISyntax wrappedSyntax;
-        private string _owner;
-
-        public LegacySyntax(captainalm.calmcon.api.ISyntax syntIn, string owner)
+        private int setupNextKey(ref int ckey, ref object locker)
         {
-            wrappedSyntax = syntIn;
-            _owner = owner;
-        }
-
-        public bool decode(string dataIn, ref string commandOut, ref string[] argumentsOut)
-        {
-            if ((dataIn.StartsWith("'") & dataIn.EndsWith("'")) | (dataIn.StartsWith("\"") & dataIn.EndsWith("\""))) return false;
-            var ret = wrappedSyntax.decrypt(dataIn, new List<String>(API.getCommands()));
-            if (object.ReferenceEquals(ret, null) || ret.Count == 0) return false;
-            commandOut = ret[0];
-            if (object.ReferenceEquals(commandOut, null)) return false;
-            if (ret.Count > 1)
+            int toret = 0;
+            lock (locker)
             {
-                argumentsOut = new string[ret.Count - 1];
-                for (int i = 1; i < ret.Count; i++)
+                if (ckey == int.MaxValue) { ckey = int.MinValue; }
+                else
                 {
-                    argumentsOut[i - 1] = ret[i];
+                    if (ckey == -1) throw new Exception("Key Reached Limit!"); else ckey += 1;
                 }
+                toret = ckey;
             }
-            return true;
-        }
-
-        public object argumentTypeConversion(string argumentIn)
-        {
-            return ((argumentIn.StartsWith("'") & argumentIn.EndsWith("'")) | (argumentIn.StartsWith("\"") & argumentIn.EndsWith("\""))) ? argumentIn.Substring(1, argumentIn.Length - 2) : argumentIn;
-        }
-
-        public string name
-        {
-            get { return wrappedSyntax.name(); }
-        }
-
-        public string owner
-        {
-            get { return _owner; }
-        }
-    }
-
-    internal sealed class LegacyCommand : ICommand
-    {
-        public captainalm.calmcon.api.Command wrappedCommand;
-        private string _owner;
-
-        public LegacyCommand(captainalm.calmcon.api.Command comIn, string owner)
-        {
-            wrappedCommand = comIn;
-            _owner = owner;
-        }
-
-        public object run(object[] argumentsIn)
-        {
-            var ts = new string[argumentsIn.Length];
-            if (argumentsIn.Length > 0)
-            {
-                for (int i = 0; i < argumentsIn.Length; i++)
-                {
-                    ts[i] = argumentsIn[i].ToString();
-                }
-            }
-            return wrappedCommand.command.Invoke(ts);
-        }
-
-        public string help
-        {
-            get { return wrappedCommand.help; }
-        }
-
-        public string name
-        {
-            get { return wrappedCommand.name; }
-        }
-
-        public string owner
-        {
-            get { return _owner; }
+            return toret;
         }
     }
 }

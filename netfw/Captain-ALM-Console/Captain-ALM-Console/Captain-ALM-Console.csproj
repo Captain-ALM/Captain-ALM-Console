@@ -44,6 +44,9 @@
     <Compile Include="Interfaces\Wrappers\Name.cs" />
     <Compile Include="Loader\ExtensionSetupMethodAttribute.cs" />
     <Compile Include="Loader\LegacyLoader.cs" />
+    <Compile Include="Loader\Legacy\LegacyCommand.cs" />
+    <Compile Include="Loader\Legacy\LegacyHookManagement.cs" />
+    <Compile Include="Loader\Legacy\LegacySyntax.cs" />
     <Compile Include="Loader\Loader.cs" />
     <Compile Include="Processor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

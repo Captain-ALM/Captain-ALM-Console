@@ -220,7 +220,7 @@ namespace captainalm.calmcmd
             foreach (string t in hookHolder.hookInformation.Keys)
             {
                 var c = hookHolder.hookInformation[t];
-                if (!object.ReferenceEquals(c.hook_command_postexecute, null)) c.hook_command_postexecute.Invoke(cmdln, object.ReferenceEquals(objOut, null) ? new captainalm.calmcon.api.OutputText() : (objOut.GetType() == typeof(string) ? new captainalm.calmcon.api.OutputText((string)objOut) : (objOut.GetType() == typeof(captainalm.calmcon.api.OutputText) ? (captainalm.calmcon.api.OutputText)objOut : new captainalm.calmcon.api.OutputText(objOut.ToString()))));
+                if (!object.ReferenceEquals(c.hook_command_postexecute, null)) c.hook_command_postexecute.Invoke(cmdln, object.ReferenceEquals(objOut, null) ? (captainalm.calmcon.api.OutputText)"" : (objOut.GetType() == typeof(string) ? (captainalm.calmcon.api.OutputText)((string)objOut) : (objOut.GetType() == typeof(captainalm.calmcon.api.OutputText) ? (captainalm.calmcon.api.OutputText)objOut : (captainalm.calmcon.api.OutputText)objOut.ToString())));
             }
         }
 

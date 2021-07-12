@@ -33,7 +33,7 @@ namespace captainalm.calmcmd
         /// <summary>
         /// Gets the targeted libraryName, if any, of the holder
         /// </summary>
-        public readonly string fastAccessName
+        public string fastAccessName
         {
             get
             {

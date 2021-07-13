@@ -65,7 +65,16 @@ namespace captainalm.calmcmd
             try
             {
                 var ev = ConsolePreCommand;
-                if (ev != null) return ev.Invoke(cmdln);
+                if (ev != null)
+                {
+                    var toret = true;
+                    var il = (PreCommandExecute[])ev.GetInvocationList();
+                    foreach (var m in il)
+                    {
+                        toret &= m.Invoke(cmdln);
+                    }
+                    return toret;
+                }
             }
             catch (ThreadAbortException ex) { throw ex; }
             catch (Exception ex) { }

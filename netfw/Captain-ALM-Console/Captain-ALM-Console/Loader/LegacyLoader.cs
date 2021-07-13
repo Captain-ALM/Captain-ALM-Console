@@ -196,7 +196,7 @@ namespace captainalm.calmcmd
             }
         }
 
-        public void executeEndHook()
+        public void executeEndHooks()
         {
             foreach (string t in hookHolder.hookInformation.Keys)
             {
@@ -205,7 +205,7 @@ namespace captainalm.calmcmd
             }
         }
 
-        public bool executePreCHook(string cmdln)
+        public bool executePreCHooks(string cmdln)
         {
             foreach (string t in hookHolder.hookInformation.Keys)
             {
@@ -215,7 +215,7 @@ namespace captainalm.calmcmd
             return true;
         }
 
-        public void executePostCHook(string cmdln, object objOut)
+        public void executePostCHooks(string cmdln, object objOut)
         {
             foreach (string t in hookHolder.hookInformation.Keys)
             {
@@ -321,7 +321,7 @@ namespace captainalm.calmcmd
                 foreach (MethodInfo c in typeIn.GetMethods(BindingFlags.Public | BindingFlags.Instance))
                 {
                     captainalm.calmcon.api.SetupMethodAttribute[] aarr = (captainalm.calmcon.api.SetupMethodAttribute[])c.GetCustomAttributes(typeof(captainalm.calmcon.api.SetupMethodAttribute), false);
-                    if (aarr.Length != 0 & initMethod.ReturnType == typeof(captainalm.calmcon.api.LibrarySetup)) { initMethod = c; }
+                    if (aarr.Length != 0 & c.ReturnType == typeof(captainalm.calmcon.api.LibrarySetup)) { initMethod = c; }
                 }
                 instanceType = typeIn.Assembly.CreateInstance(typeIn.FullName);
             }

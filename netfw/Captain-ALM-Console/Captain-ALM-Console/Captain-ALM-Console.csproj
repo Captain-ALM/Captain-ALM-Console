@@ -33,6 +33,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API.cs" />
@@ -51,6 +52,7 @@
     <Compile Include="Processor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Registry.cs" />
+    <Compile Include="StylableString.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\cnshare\cnshare.csproj">

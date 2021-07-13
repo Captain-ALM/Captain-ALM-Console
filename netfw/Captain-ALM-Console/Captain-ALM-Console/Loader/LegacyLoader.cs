@@ -159,6 +159,22 @@ namespace captainalm.calmcmd
             };
         }
 
+        public StylableString convertOutputTextToStylableString(object objIn)
+        {
+            if (objIn.GetType() == typeof(captainalm.calmcon.api.OutputText))
+            {
+                var oi = (captainalm.calmcon.api.OutputText)objIn;
+                var oia = oi.ToOutputTextBlocks();
+                if (oia.Length > 0) return this.convertOutputTextToStylableString(oia[0]);
+            }
+            else if (objIn.GetType() == typeof(captainalm.calmcon.api.OutputTextBlock))
+            {
+                var oi = (captainalm.calmcon.api.OutputTextBlock) objIn;
+                return new StylableString(oi.text) { backcolor = System.Drawing.Color.Empty, forecolor = oi.forecolor, bold = oi.bold, italic = oi.italic, strikeout = oi.strikeout, underline = oi.underline };
+            }
+            return default(StylableString);
+        }
+
         public bool loadAssembly(Assembly assemblyIn)
         {
             if (object.ReferenceEquals(assemblyIn, null)) return false;

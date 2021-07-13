@@ -39,6 +39,27 @@ namespace captainalm.calmcmd
             return toret;
         }
 
+        internal static StylableString convertOutputTextToStylableString(object objIn)
+        {
+            if ((!lav.HasValue) || lav == false) return default(StylableString);
+            lock (slockll)
+            {
+                try
+                {
+                    if (!object.ReferenceEquals(ll, null))
+                    {
+                        return ll.convertOutputTextToStylableString(objIn);
+                    }
+                }
+                catch (ThreadAbortException ex) { throw ex; }
+                catch (Exception ex)
+                {
+                    lav = false;
+                }
+            }
+            return default(StylableString);
+        }
+
         internal static void startEvent()
         {
             if ((!lav.HasValue) || lav == false) return;

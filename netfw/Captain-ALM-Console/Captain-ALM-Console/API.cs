@@ -280,5 +280,16 @@ namespace captainalm.calmcmd
                 return Registry.getCommand(_invalidCommandName);
             }
         }
+
+        /// <summary>
+        /// Provides a function to convert a Legacy OutputText or OutputTextBlock to a StylableString
+        /// </summary>
+        /// <param name="objIn">The OutputText or OutputTextBlock to convert</param>
+        /// <returns>The converted to stylable string</returns>
+        public static StylableString convertOutputTextToStylableString(object objIn)
+        {
+            if (object.ReferenceEquals(objIn, null)) throw new ArgumentNullException("objIn");
+            return Loader.convertOutputTextToStylableString(objIn);
+        }
     }
 }

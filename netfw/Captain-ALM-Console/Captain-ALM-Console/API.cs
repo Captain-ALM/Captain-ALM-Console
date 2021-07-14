@@ -291,5 +291,44 @@ namespace captainalm.calmcmd
             if (object.ReferenceEquals(objIn, null)) throw new ArgumentNullException("objIn");
             return Loader.convertOutputTextToStylableString(objIn);
         }
+
+        /// <summary>
+        /// Raises the <see cref="captainalm.calmcmd.CaptainALMConsoleException">CaptainALMConsoleException</see> with the specified parameters (If any)
+        /// </summary>
+        /// <param name="msg">The message to use</param>
+        /// <param name="exp">The inner exception to use</param>
+        public static void raiseCaptainALMConsoleException(string msg = null, Exception exp = null)
+        {
+            if (object.ReferenceEquals(msg, null)) throw new CaptainALMConsoleException();
+            if (object.ReferenceEquals(exp, null)) throw new CaptainALMConsoleException(msg);
+            throw new CaptainALMConsoleException(msg, exp);
+        }
+        /// <summary>
+        /// Requests a user input using <see cref="captainalm.calmcmd.Processor.InputRequiredHandler">Processor.InputRequiredHandler</see>
+        /// </summary>
+        /// <param name="convertUsingCurrentSyntax">Convert the string input taken using the type conversion of the current syntax</param>
+        /// <returns>The user input (Which may be converted to an object) or null if it fails</returns>
+        public static object requestUserInput(bool convertUsingCurrentSyntax = false)
+        {
+            lock (Processor.slockir)
+            {
+                if (!object.ReferenceEquals(Processor._ir, null))
+                {
+                    var ret = Processor._ir.Invoke();
+                    if (convertUsingCurrentSyntax)
+                    {
+                        lock (slocksyntax)
+                        {
+                            if (object.ReferenceEquals(Processor.currentSyntax, null)) return ret; else return Processor.currentSyntax.argumentTypeConversion(ret);
+                        }
+                    }
+                    else
+                    {
+                        return ret;
+                    }
+                }
+            }
+            return null;
+        }
     }
 }

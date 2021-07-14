@@ -12,6 +12,8 @@ namespace captainalm.calmcmd
         internal static ISyntax currentSyntax;
         internal static object slockCommandStack = new object();
         internal static Stack<string> CommandStack = new Stack<string>();
+        internal static InputRequired _ir;
+        internal static object slockir = new object();
 
         /// <summary>
         /// Provides a delegate to return an object from an executed command
@@ -35,6 +37,31 @@ namespace captainalm.calmcmd
         /// This event is raised when the commands remaining is updated
         /// </summary>
         public static event StatusReturner StatusUpdate;
+        /// <summary>
+        /// Provides a delegate to return a string which was entered by the user
+        /// </summary>
+        /// <returns>The entered string</returns>
+        public delegate string InputRequired();
+        /// <summary>
+        /// This property is used to hold the InputRequired delegate that's raised when an input is required
+        /// </summary>
+        public static InputRequired InputRequiredHandler
+        {
+            get
+            {
+                lock (slockir)
+                {
+                    return _ir;
+                }
+            }
+            set
+            {
+                lock (slockir)
+                {
+                    _ir = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Executes the given command string using the current syntax

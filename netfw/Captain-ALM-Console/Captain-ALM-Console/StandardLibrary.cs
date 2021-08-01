@@ -230,6 +230,18 @@ namespace captainalm.calmcmd
                 }
             }
         }
+        protected virtual object get_false(object[] args)
+        {
+            return false;
+        }
+        protected virtual object get_true(object[] args)
+        {
+            return true;
+        }
+        protected virtual object get_newline(object[] args)
+        {
+            return Environment.NewLine;
+        }
 
         //Converters:
         protected virtual object str_conv(object[] args)
@@ -1124,6 +1136,9 @@ namespace captainalm.calmcmd
             toret.Add(new Command(create_uintptr, "", "uintptr", "uintptr (value:UIntergral) > System.UIntPtr"));
             toret.Add(new Command(random, "", "random", "random (maximum:System.Int32) (minimum:System.Int32) > System.Int32"));
             toret.Add(new Command(create_color, "", "create_color", "create_color %name or hexdecimal #RRGGBB #AARRGGBB:String|integer value:System.Int32|integer array of rgb or rgba:System.Int32[]|Red value:System.Int32% (Green value:System.Int32) (Blue value:System.Int32) (Alpha value:System.Int32) > System.Drawing.Color"));
+            toret.Add(new Command(get_false, "", "false", "false > System.Boolean"));
+            toret.Add(new Command(get_true, "", "true", "true > System.Boolean"));
+            toret.Add(new Command(get_newline, "", "newline", "newline > System.String"));
 
             toret.Add(new Command(str_conv, "", "to_str", "to_str %input:System.Object% > System.String"));
             toret.Add(new Command(sbyte_conv, "", "to_sbyte", "to_sbyte %input:System.Object% > System.SByte"));

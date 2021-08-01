@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading;
 
 namespace captainalm.calmcmd
@@ -33,7 +34,7 @@ namespace captainalm.calmcmd
                 if (ev != null) ev.Invoke();
             }
             catch (ThreadAbortException ex) { throw ex; }
-            catch (Exception ex) { }
+            catch (Exception) { }
         }
         /// <summary>
         /// This event is raised when the console is ending before it terminates
@@ -47,7 +48,7 @@ namespace captainalm.calmcmd
                 if (ev != null) ev.Invoke();
             }
             catch (ThreadAbortException ex) { throw ex; }
-            catch (Exception ex) { }
+            catch (Exception) { }
         }
         /// <summary>
         /// Provides a delegate to be used before a command is executed
@@ -77,7 +78,7 @@ namespace captainalm.calmcmd
                 }
             }
             catch (ThreadAbortException ex) { throw ex; }
-            catch (Exception ex) { }
+            catch (Exception) { }
             return true; //Carry on executing the command on an exception
         }
         /// <summary>
@@ -99,7 +100,7 @@ namespace captainalm.calmcmd
                 if (ev != null) ev.Invoke(cmdln, objOut);
             }
             catch (ThreadAbortException ex) { throw ex; }
-            catch (Exception ex) { }
+            catch (Exception) { }
         }
 
         /// <summary>
@@ -141,7 +142,7 @@ namespace captainalm.calmcmd
                 return true;
             }
             ISyntax st = Registry.getSyntax(nameIn);
-            if (st != null)
+            if (! object.ReferenceEquals(st, null))
             {
                 lock (slocksyntax)
                 {
@@ -329,6 +330,73 @@ namespace captainalm.calmcmd
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// Checks the types of the items in the args array against the types in the type array for convertability
+        /// Use null or void in types to represent requiring a null parameter
+        /// Use object to accept all types including null
+        /// Also checks if the input arrays are the same length
+        /// </summary>
+        /// <param name="args">The arguments to assert</param>
+        /// <param name="types">The types to test with</param>
+        public static void assertArguments(object[] args, Type[] types)
+        {
+            if (object.ReferenceEquals(args, null)) throw new ArgumentNullException("args");
+            if (object.ReferenceEquals(types, null)) throw new ArgumentNullException("types");
+            if (args.Length != types.Length) throw new CaptainALMConsoleException("The argument count is incorrect.");
+            for (int i = 0; i < args.Length; i++)
+            {
+                if ((! object.ReferenceEquals(args[i], null)) && (! object.ReferenceEquals(types[i], null)))
+                {
+                    if ((types[i] != typeof(object)) && (! isAssignableFrom(types[i], args[i].GetType()))) throw new CaptainALMConsoleException("The argument at position " + (i + 1).ToString() + " is of the type " + args[i].GetType().FullName + " it should be of the type " + types[i].FullName + " .");
+                }
+                else if (! (object.ReferenceEquals(args[i], null) && object.ReferenceEquals(types[i], null)))
+                {
+                    if (object.ReferenceEquals(args[i], null)) {
+                        if (types[i] != typeof(void) && types[i] != typeof(object)) throw new CaptainALMConsoleException("The argument at position " + (i + 1).ToString() + " is of the type null it should be of the type " + types[i].FullName + " .");
+                    }
+                    else if (object.ReferenceEquals(types[i], null))
+                    {
+                        throw new CaptainALMConsoleException("The argument at position " + (i + 1).ToString() + " is of the type " + args[i].GetType().FullName + " it should be of the type null .");
+                    }
+                }
+            }
+        }
+        private static bool isAssignableFrom(Type to, Type from)
+        {
+            if (to == from) return true;
+            if (to.IsAssignableFrom(from)) return true;
+            var fromsm = from.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+            foreach (var c in fromsm) if (c.Name.Equals("op_Implicit") && c.ReturnType == to) return true;
+            var tosm = to.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly);
+            foreach (var c in tosm) if (c.Name.Equals("op_Implicit") && c.GetParameters().Length > 0 && c.GetParameters()[0].ParameterType == from) return true;
+            if ((from == typeof(sbyte)) && (to == typeof(short) || to == typeof(int) || to == typeof(long) || to == typeof(float) || to == typeof(double) || to == typeof(decimal))) return true;
+            if ((from == typeof(byte)) && (to == typeof(short) || to == typeof(int) || to == typeof(long) || to == typeof(float) || to == typeof(double) || to == typeof(decimal) || to == typeof(ushort) || to == typeof(uint)) || to == typeof(ulong)) return true;
+            if ((from == typeof(short)) && (to == typeof(int) || to == typeof(long) || to == typeof(float) || to == typeof(double) || to == typeof(decimal))) return true;
+            if ((from == typeof(ushort)) && (to == typeof(int) || to == typeof(long) || to == typeof(float) || to == typeof(double) || to == typeof(decimal) || to == typeof(uint)) || to == typeof(ulong)) return true;
+            if ((from == typeof(int)) && (to == typeof(long) || to == typeof(float) || to == typeof(double) || to == typeof(decimal))) return true;
+            if ((from == typeof(uint)) && (to == typeof(long) || to == typeof(float) || to == typeof(double) || to == typeof(decimal) || to == typeof(ulong))) return true;
+            if ((from == typeof(long)) && (to == typeof(float) || to == typeof(double) || to == typeof(decimal))) return true;
+            if ((from == typeof(ulong)) && (to == typeof(float) || to == typeof(double) || to == typeof(decimal))) return true;
+            if ((from == typeof(float)) && (to == typeof(double))) return true;
+            return false;
+        }
+        /// <summary>
+        /// Checks if the references of the items in the args array for being null against the array of if they are allowed to be null
+        /// Also checks if the input arrays are the same length
+        /// </summary>
+        /// <param name="args">The arguments to assert</param>
+        /// <param name="isNull">The boolean values of if each item is allowed be null</param>
+        public static void assertNullArguments(object[] args, bool[] isNull)
+        {
+            if (object.ReferenceEquals(args, null)) throw new ArgumentNullException("args");
+            if (object.ReferenceEquals(isNull, null)) throw new ArgumentNullException("isNull");
+            if (args.Length != isNull.Length) throw new CaptainALMConsoleException("The argument count is incorrect.");
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (object.ReferenceEquals(args[i], null) && !isNull[i]) throw new CaptainALMConsoleException("The argument at position " + (i + 1).ToString() + " is null and it should be not null .");
+            }
         }
     }
 }

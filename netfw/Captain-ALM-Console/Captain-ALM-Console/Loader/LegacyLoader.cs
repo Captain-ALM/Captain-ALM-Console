@@ -77,7 +77,7 @@ namespace captainalm.calmcmd
                         {
                             Registry.registerCommand(ecmdreg[k]);
                         }
-                        catch (CaptainALMConsoleException e)
+                        catch (CaptainALMConsoleException)
                         {
                             ecmdreg.Remove(k);
                             throw new Exception("Command Already Exists!");
@@ -98,7 +98,7 @@ namespace captainalm.calmcmd
                         {
                             Registry.registerSyntax(esnxreg[k]);
                         }
-                        catch (CaptainALMConsoleException e)
+                        catch (CaptainALMConsoleException)
                         {
                             esnxreg.Remove(k);
                             throw new Exception("Syntax Already Exists!");
@@ -165,6 +165,13 @@ namespace captainalm.calmcmd
             {
                 var oi = (captainalm.calmcon.api.OutputText)objIn;
                 var oia = oi.ToOutputTextBlocks();
+                if (oia.Length > 1)
+                {
+                    for (int i = 1; i < oia.Length; i++)
+                    {
+                        oia[0].text += oia[i].text;
+                    }
+                }
                 if (oia.Length > 0) return this.convertOutputTextToStylableString(oia[0]);
             }
             else if (objIn.GetType() == typeof(captainalm.calmcon.api.OutputTextBlock))
@@ -181,7 +188,7 @@ namespace captainalm.calmcmd
             var toret = true;
             foreach (Type c in assemblyIn.GetTypes())
             {
-                if (!c.IsAbstract & !c.IsInterface)
+                if (!c.IsAbstract & !c.IsInterface & !c.IsEnum)
                 {
                     toret &= typeProcessor(c);
                 }
@@ -342,20 +349,20 @@ namespace captainalm.calmcmd
                 instanceType = typeIn.Assembly.CreateInstance(typeIn.FullName);
             }
             catch (ThreadAbortException ex) { throw ex; }
-            catch (Exception ex) { return false; }
-            if (initMethod != null && instanceType != null)
+            catch (Exception) { return false; }
+            if (initMethod != null && ! object.ReferenceEquals(instanceType, null))
             {
                 try
                 {
                     libs = (captainalm.calmcon.api.LibrarySetup)initMethod.Invoke(instanceType, null);
                 }
                 catch (ThreadAbortException ex) { throw ex; }
-                catch (Exception ex) { return false; }
+                catch (Exception) { return false; }
                 if (!hookHolder.hookInformation.ContainsKey(libs.hook_info.name)) hookHolder.hookInformation.Add(libs.hook_info.name, libs.hook_info);
                 if (libs.syntaxes != null) {
                     foreach (captainalm.calmcon.api.ISyntax c in libs.syntaxes)
                     {
-                        if (registerFirstLegacySyntaxesToStandardLibrary && Registry.getSyntax(c.name()) == null)
+                        if (registerFirstLegacySyntaxesToStandardLibrary && object.ReferenceEquals(Registry.getSyntax(c.name()), null))
                         {
                             var lstsstd = new LegacySyntax(c, "");
                             Registry.registerSyntax(lstsstd);
@@ -368,7 +375,7 @@ namespace captainalm.calmcmd
                 {
                     foreach (captainalm.calmcon.api.Command c in libs.commands)
                     {
-                        if (registerFirstLegacyCommandsToStandardLibrary && Registry.getCommand(c.name) == null)
+                        if (registerFirstLegacyCommandsToStandardLibrary && object.ReferenceEquals(Registry.getCommand(c.name), null))
                         {
                             var lctsstd = new LegacyCommand(c, "");
                             Registry.registerCommand(lctsstd);

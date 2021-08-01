@@ -31,7 +31,7 @@ namespace captainalm.calmcmd
                 }
             }
             catch (ThreadAbortException ex) { throw ex; }
-            catch (Exception ex) { toret = false; }
+            catch (Exception) { toret = false; }
             if (!toret)
             {
                 lock (slockll) { lav = false; }
@@ -52,7 +52,7 @@ namespace captainalm.calmcmd
                     }
                 }
                 catch (ThreadAbortException ex) { throw ex; }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     lav = false;
                 }
@@ -73,7 +73,7 @@ namespace captainalm.calmcmd
                     }
                 }
                 catch (ThreadAbortException ex) { throw ex; }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     lav = false;
                 }
@@ -107,7 +107,7 @@ namespace captainalm.calmcmd
                     }
                 }
                 catch (ThreadAbortException ex) { throw ex; }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     lav = false;
                 }
@@ -141,7 +141,7 @@ namespace captainalm.calmcmd
                     }
                 }
                 catch (ThreadAbortException ex) { throw ex; }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     lav = false;
                 }
@@ -176,7 +176,7 @@ namespace captainalm.calmcmd
                     }
                 }
                 catch (ThreadAbortException ex) { throw ex; }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     lav = false;
                 }
@@ -185,14 +185,14 @@ namespace captainalm.calmcmd
         /// <summary>
         /// Registers the postcmdEvent used by the legacy loading system
         /// </summary>
-        public static void registerprecmdEvent()
+        public static void registerpostcmdEvent()
         {
             API.ConsolePostCommand += postcmdEvent;
         }
         /// <summary>
         /// Unregisters the postcmdEvent used by the legacy loading system
         /// </summary>
-        public static void unregisterprecmdEvent()
+        public static void unregisterpostcmdEvent()
         {
             API.ConsolePostCommand -= postcmdEvent;
         }
@@ -201,7 +201,7 @@ namespace captainalm.calmcmd
         /// Gets the legacyHookHolder for the legacy system
         /// Returns null if legacy is not supported or isLegacySupported has not been called yet
         /// </summary>
-        public LegacyHookHolder legacyHookHolder
+        public static LegacyHookHolder legacyHookHolder
         {
             get
             {
@@ -216,7 +216,7 @@ namespace captainalm.calmcmd
                         }
                     }
                     catch (ThreadAbortException ex) { throw ex; }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         lav = false;
                     }
@@ -228,7 +228,7 @@ namespace captainalm.calmcmd
         /// Gets or sets the legacyHookExecutorHolder used by the legacy system
         /// Returns the default value if legacy is not supported or isLegacySupported has not been called yet
         /// </summary>
-        public LegacyHookRunnerHolder legacyHookExecutorHolder
+        public static LegacyHookRunnerHolder legacyHookExecutorHolder
         {
             get
             {
@@ -243,7 +243,7 @@ namespace captainalm.calmcmd
                         }
                     }
                     catch (ThreadAbortException ex) { throw ex; }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         lav = false;
                     }
@@ -263,7 +263,7 @@ namespace captainalm.calmcmd
                         }
                     }
                     catch (ThreadAbortException ex) { throw ex; }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         lav = false;
                     }
@@ -348,7 +348,7 @@ namespace captainalm.calmcmd
                     }
                 }
                 catch (ThreadAbortException ex) { throw ex; }
-                catch (Exception ex) {
+                catch (Exception) {
                     lav = false;
                 }
             }
@@ -367,7 +367,7 @@ namespace captainalm.calmcmd
             var toret = true;
             foreach (Type c in assemblyIn.GetTypes())
             {
-                if (c.IsPublic & !c.IsAbstract & !c.IsInterface)
+                if (c.IsPublic & !c.IsAbstract & !c.IsInterface & !c.IsEnum)
                 {
                     toret &= typeProcessor(c);
                 }
@@ -384,7 +384,7 @@ namespace captainalm.calmcmd
                         }
                     }
                     catch (ThreadAbortException ex) { throw ex; }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         lav = false;
                     }
@@ -414,7 +414,7 @@ namespace captainalm.calmcmd
                 }
             }
             catch (ThreadAbortException ex) { throw ex; }
-            catch (Exception ex) { return false; }
+            catch (Exception) { return false; }
             if (initMethod != null)
             {
                 try
@@ -424,7 +424,7 @@ namespace captainalm.calmcmd
                     initMethod.Invoke(instance, null);
                 }
                 catch (ThreadAbortException ex) { throw ex; }
-                catch (Exception ex) { return false; }
+                catch (Exception) { return false; }
             }
             return true;
         }

@@ -99,6 +99,31 @@ namespace captainalm.calmcmd
             }
         }
         /// <summary>
+        /// Executes the given command string using the specified syntax
+        /// </summary>
+        /// <param name="cmdstr">The command string</param>
+        /// <param name="synx">The syntax instance</param>
+        /// <returns>The result of the command</returns>
+        public static object executeCommand(string cmdstr, ISyntax synx)
+        {
+            if (object.ReferenceEquals(synx, null)) return cmdstr;
+            var com = API.invalidCommandName;
+            var args = new string[0];
+            if (synx.decode(cmdstr, ref com, ref args))
+            {
+                ICommand cmd = Registry.getCommand(com);
+                if (object.ReferenceEquals(cmd, null)) return API.invalidCommand.run(new object[0]);
+                if (object.ReferenceEquals(args, null)) args = new string[0];
+                var argsp = new object[args.Length];
+                for (int i = 0; i < args.Length; i++) argsp[i] = executeCommand(args[i], synx);
+                return cmd.run(argsp);
+            }
+            else
+            {
+                return synx.argumentTypeConversion(cmdstr);
+            }
+        }
+        /// <summary>
         /// Adds a command to the stack
         /// </summary>
         /// <param name="cmdstr">The command string to add</param>
@@ -147,7 +172,7 @@ namespace captainalm.calmcmd
                     }
                 }
                 catch (ThreadAbortException ex) { throw ex; }
-                catch (Exception ex) { }
+                catch (Exception) { }
             }
             API.InvokeConsoleEnd();
         }

@@ -19,6 +19,7 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Debug\Captain-ALM-Console.xml</DocumentationFile>
     <ConsolePause>false</ConsolePause>
+    <NoWarn>1591, 419</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -30,6 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -42,6 +44,23 @@
     <Compile Include="Interfaces\IName.cs" />
     <Compile Include="Loader\Loader.cs" />
     <Compile Include="Loader\ExtensionSetupMethodAttribute.cs" />
+    <Compile Include="StylableString.cs" />
+    <Compile Include="Loader\LegacyLoader.cs" />
+    <Compile Include="Loader\Legacy\LegacyHookManagement.cs" />
+    <Compile Include="Loader\Legacy\LegacySyntax.cs" />
+    <Compile Include="Loader\Legacy\LegacyCommand.cs" />
+    <Compile Include="Interfaces\Wrappers\Name.cs" />
+    <Compile Include="Interfaces\Wrappers\Command.cs" />
+    <Compile Include="StandardLibrary\StandardLibrary.cs" />
+    <Compile Include="StandardLibrary\DefaultSyntax.cs" />
+    <Compile Include="StandardLibrary\LegacyStandardLibrary.cs" />
+    <Compile Include="StandardLibrary\LegacyDefaultSyntax.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\cnshare\cnshare.csproj">
+      <Project>{9DBCAA78-AFA7-42DD-81CA-D2A056AA74E3}</Project>
+      <Name>cnshare</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

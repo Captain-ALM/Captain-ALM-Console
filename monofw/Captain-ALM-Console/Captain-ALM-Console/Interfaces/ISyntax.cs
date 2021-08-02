@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace captainalm.calmcmd
 {
@@ -14,7 +13,8 @@ namespace captainalm.calmcmd
         /// <param name="dataIn">The command string in</param>
         /// <param name="commandOut">The command name string out</param>
         /// <param name="argumentsOut">The array of argument strings out</param>
-        /// <returns>If the command string was valid</returns>
+        /// <returns>If the command string was valid (Should still be valid if the command was invalid but the syntax was correct)</returns>
+        /// <remarks>If the syntax was correct but the command invalid, the return value should still be true, but the command out should be the value of <see cref="captainalm.calmcmd.API.invalidCommandName">API.invalidCommand</see>.</remarks>
         bool decode(string dataIn, ref string commandOut, ref string[] argumentsOut);
         /// <summary>
         /// Converts a string argument to another type if needed

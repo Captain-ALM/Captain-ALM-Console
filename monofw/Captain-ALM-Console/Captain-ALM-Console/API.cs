@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading;
 
 namespace captainalm.calmcmd
@@ -9,11 +10,13 @@ namespace captainalm.calmcmd
     /// </summary>
     public static class API
     {
-        private static object slockssyntax = new object();
-        internal static string currentSyntaxName;
+        internal static object slocksyntax = new object();
+        internal static string currentSyntaxName = "";
         internal static Dictionary<string, string> StringVariableDictionary = new Dictionary<string, string>();
+        internal static object slocksvd = new object();
         private static Dictionary<string, object> VariableDictionary = new Dictionary<string, object>();
-        internal static string invalidCommandName = "invalid";
+        private static object slockvd = new object();
+        internal static string _invalidCommandName = "invalid";
 
         /// <summary>
         /// Provides a delegate to be used by program events
@@ -31,7 +34,7 @@ namespace captainalm.calmcmd
                 if (ev != null) ev.Invoke();
             }
             catch (ThreadAbortException ex) { throw ex; }
-            catch (Exception ex) { }
+            catch (Exception) { }
         }
         /// <summary>
         /// This event is raised when the console is ending before it terminates
@@ -45,7 +48,7 @@ namespace captainalm.calmcmd
                 if (ev != null) ev.Invoke();
             }
             catch (ThreadAbortException ex) { throw ex; }
-            catch (Exception ex) { }
+            catch (Exception) { }
         }
         /// <summary>
         /// Provides a delegate to be used before a command is executed
@@ -63,10 +66,19 @@ namespace captainalm.calmcmd
             try
             {
                 var ev = ConsolePreCommand;
-                if (ev != null) return ev.Invoke(cmdln);
+                if (ev != null)
+                {
+                    var toret = true;
+                    var il = (PreCommandExecute[])ev.GetInvocationList();
+                    foreach (var m in il)
+                    {
+                        toret &= m.Invoke(cmdln);
+                    }
+                    return toret;
+                }
             }
             catch (ThreadAbortException ex) { throw ex; }
-            catch (Exception ex) { }
+            catch (Exception) { }
             return true; //Carry on executing the command on an exception
         }
         /// <summary>
@@ -88,7 +100,7 @@ namespace captainalm.calmcmd
                 if (ev != null) ev.Invoke(cmdln, objOut);
             }
             catch (ThreadAbortException ex) { throw ex; }
-            catch (Exception ex) { }
+            catch (Exception) { }
         }
 
         /// <summary>
@@ -120,14 +132,23 @@ namespace captainalm.calmcmd
         /// <returns>If the operation completed</returns>
         public static bool setSyntax(string nameIn)
         {
-            ISyntax st = Registry.getSyntax(nameIn);
-            if (st != null)
+            if (nameIn.Equals(""))
             {
-                lock (slockssyntax)
+                lock (slocksyntax)
+                {
+                    Processor.currentSyntax = null;
+                }
+                currentSyntaxName = nameIn;
+                return true;
+            }
+            ISyntax st = Registry.getSyntax(nameIn);
+            if (! object.ReferenceEquals(st, null))
+            {
+                lock (slocksyntax)
                 {
                     Processor.currentSyntax = st;
                 }
-                currentSyntaxName = (st.owner.Equals("")) ? st.name : st.owner + "." + st.name;
+                currentSyntaxName = nameIn;
                 return true;
             }
             return false;
@@ -155,13 +176,16 @@ namespace captainalm.calmcmd
         /// <param name="valueIn">The value to store</param>
         public static void setStringVariable(string name, string valueIn)
         {
-            if (StringVariableDictionary.ContainsKey(name)) 
+            lock (slocksvd)
             {
-                StringVariableDictionary[name] = valueIn;
-            }
-            else
-            {
-                StringVariableDictionary.Add(name, valueIn);
+                if (StringVariableDictionary.ContainsKey(name))
+                {
+                    StringVariableDictionary[name] = valueIn;
+                }
+                else
+                {
+                    StringVariableDictionary.Add(name, valueIn);
+                }
             }
         }
         /// <summary>
@@ -171,9 +195,12 @@ namespace captainalm.calmcmd
         /// <returns>The value obtained</returns>
         public static string getStringVariable(string name)
         {
-            if (StringVariableDictionary.ContainsKey(name))
+            lock (slocksvd)
             {
-                return StringVariableDictionary[name];
+                if (StringVariableDictionary.ContainsKey(name))
+                {
+                    return StringVariableDictionary[name];
+                }
             }
             return "";
         }
@@ -182,7 +209,10 @@ namespace captainalm.calmcmd
         /// </summary>
         public static void clearStringVariables()
         {
-            StringVariableDictionary.Clear();
+            lock (slocksvd)
+            {
+                StringVariableDictionary.Clear();
+            }
         }
 
         /// <summary>
@@ -192,13 +222,16 @@ namespace captainalm.calmcmd
         /// <param name="valueIn">The value to store</param>
         public static void setVariable(string name, object valueIn)
         {
-            if (VariableDictionary.ContainsKey(name))
+            lock (slockvd)
             {
-                VariableDictionary[name] = valueIn;
-            }
-            else
-            {
-                VariableDictionary.Add(name, valueIn);
+                if (VariableDictionary.ContainsKey(name))
+                {
+                    VariableDictionary[name] = valueIn;
+                }
+                else
+                {
+                    VariableDictionary.Add(name, valueIn);
+                }
             }
         }
         /// <summary>
@@ -208,9 +241,12 @@ namespace captainalm.calmcmd
         /// <returns>The value obtained</returns>
         public static object getVariable(string name)
         {
-            if (VariableDictionary.ContainsKey(name))
+            lock (slockvd)
             {
-                return VariableDictionary[name];
+                if (VariableDictionary.ContainsKey(name))
+                {
+                    return VariableDictionary[name];
+                }
             }
             return null;
         }
@@ -219,17 +255,147 @@ namespace captainalm.calmcmd
         /// </summary>
         public static void clearVariables()
         {
-            VariableDictionary.Clear();
+            lock (slockvd)
+            {
+                VariableDictionary.Clear();
+            }
         }
 
         /// <summary>
         /// Gets the name of the invalid command
         /// </summary>
-        public static string invalidCommand
+        public static string invalidCommandName
         {
             get
             {
-                return invalidCommandName;
+                return _invalidCommandName;
+            }
+        }
+        /// <summary>
+        /// Gets the invalid command
+        /// </summary>
+        public static ICommand invalidCommand
+        {
+            get
+            {
+                return Registry.getCommand(_invalidCommandName);
+            }
+        }
+
+        /// <summary>
+        /// Provides a function to convert a Legacy OutputText or OutputTextBlock to a StylableString
+        /// </summary>
+        /// <param name="objIn">The OutputText or OutputTextBlock to convert</param>
+        /// <returns>The converted to stylable string</returns>
+        public static StylableString convertOutputTextToStylableString(object objIn)
+        {
+            if (object.ReferenceEquals(objIn, null)) throw new ArgumentNullException("objIn");
+            return Loader.convertOutputTextToStylableString(objIn);
+        }
+
+        /// <summary>
+        /// Raises the <see cref="captainalm.calmcmd.CaptainALMConsoleException">CaptainALMConsoleException</see> with the specified parameters (If any)
+        /// </summary>
+        /// <param name="msg">The message to use</param>
+        /// <param name="exp">The inner exception to use</param>
+        public static void raiseCaptainALMConsoleException(string msg = null, Exception exp = null)
+        {
+            if (object.ReferenceEquals(msg, null)) throw new CaptainALMConsoleException();
+            if (object.ReferenceEquals(exp, null)) throw new CaptainALMConsoleException(msg);
+            throw new CaptainALMConsoleException(msg, exp);
+        }
+        /// <summary>
+        /// Requests a user input using <see cref="captainalm.calmcmd.Processor.InputRequiredHandler">Processor.InputRequiredHandler</see>
+        /// </summary>
+        /// <param name="convertUsingCurrentSyntax">Convert the string input taken using the type conversion of the current syntax</param>
+        /// <returns>The user input (Which may be converted to an object) or null if it fails</returns>
+        public static object requestUserInput(bool convertUsingCurrentSyntax = false)
+        {
+            lock (Processor.slockir)
+            {
+                if (!object.ReferenceEquals(Processor._ir, null))
+                {
+                    var ret = Processor._ir.Invoke();
+                    if (convertUsingCurrentSyntax)
+                    {
+                        lock (slocksyntax)
+                        {
+                            if (object.ReferenceEquals(Processor.currentSyntax, null)) return ret; else return Processor.currentSyntax.argumentTypeConversion(ret);
+                        }
+                    }
+                    else
+                    {
+                        return ret;
+                    }
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Checks the types of the items in the args array against the types in the type array for convertability
+        /// Use null or void in types to represent requiring a null parameter
+        /// Use object to accept all types including null
+        /// Also checks if the input arrays are the same length
+        /// </summary>
+        /// <param name="args">The arguments to assert</param>
+        /// <param name="types">The types to test with</param>
+        public static void assertArguments(object[] args, Type[] types)
+        {
+            if (object.ReferenceEquals(args, null)) throw new ArgumentNullException("args");
+            if (object.ReferenceEquals(types, null)) throw new ArgumentNullException("types");
+            if (args.Length != types.Length) throw new CaptainALMConsoleException("The argument count is incorrect.");
+            for (int i = 0; i < args.Length; i++)
+            {
+                if ((! object.ReferenceEquals(args[i], null)) && (! object.ReferenceEquals(types[i], null)))
+                {
+                    if ((types[i] != typeof(object)) && (! isAssignableFrom(types[i], args[i].GetType()))) throw new CaptainALMConsoleException("The argument at position " + (i + 1).ToString() + " is of the type " + args[i].GetType().FullName + " it should be of the type " + types[i].FullName + " .");
+                }
+                else if (! (object.ReferenceEquals(args[i], null) && object.ReferenceEquals(types[i], null)))
+                {
+                    if (object.ReferenceEquals(args[i], null)) {
+                        if (types[i] != typeof(void) && types[i] != typeof(object)) throw new CaptainALMConsoleException("The argument at position " + (i + 1).ToString() + " is of the type null it should be of the type " + types[i].FullName + " .");
+                    }
+                    else if (object.ReferenceEquals(types[i], null))
+                    {
+                        throw new CaptainALMConsoleException("The argument at position " + (i + 1).ToString() + " is of the type " + args[i].GetType().FullName + " it should be of the type null .");
+                    }
+                }
+            }
+        }
+        private static bool isAssignableFrom(Type to, Type from)
+        {
+            if (to == from) return true;
+            if (to.IsAssignableFrom(from)) return true;
+            var fromsm = from.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+            foreach (var c in fromsm) if (c.Name.Equals("op_Implicit") && c.ReturnType == to) return true;
+            var tosm = to.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly);
+            foreach (var c in tosm) if (c.Name.Equals("op_Implicit") && c.GetParameters().Length > 0 && c.GetParameters()[0].ParameterType == from) return true;
+            if ((from == typeof(sbyte)) && (to == typeof(short) || to == typeof(int) || to == typeof(long) || to == typeof(float) || to == typeof(double) || to == typeof(decimal))) return true;
+            if ((from == typeof(byte)) && (to == typeof(short) || to == typeof(int) || to == typeof(long) || to == typeof(float) || to == typeof(double) || to == typeof(decimal) || to == typeof(ushort) || to == typeof(uint)) || to == typeof(ulong)) return true;
+            if ((from == typeof(short)) && (to == typeof(int) || to == typeof(long) || to == typeof(float) || to == typeof(double) || to == typeof(decimal))) return true;
+            if ((from == typeof(ushort)) && (to == typeof(int) || to == typeof(long) || to == typeof(float) || to == typeof(double) || to == typeof(decimal) || to == typeof(uint)) || to == typeof(ulong)) return true;
+            if ((from == typeof(int)) && (to == typeof(long) || to == typeof(float) || to == typeof(double) || to == typeof(decimal))) return true;
+            if ((from == typeof(uint)) && (to == typeof(long) || to == typeof(float) || to == typeof(double) || to == typeof(decimal) || to == typeof(ulong))) return true;
+            if ((from == typeof(long)) && (to == typeof(float) || to == typeof(double) || to == typeof(decimal))) return true;
+            if ((from == typeof(ulong)) && (to == typeof(float) || to == typeof(double) || to == typeof(decimal))) return true;
+            if ((from == typeof(float)) && (to == typeof(double))) return true;
+            return false;
+        }
+        /// <summary>
+        /// Checks if the references of the items in the args array for being null against the array of if they are allowed to be null
+        /// Also checks if the input arrays are the same length
+        /// </summary>
+        /// <param name="args">The arguments to assert</param>
+        /// <param name="isNull">The boolean values of if each item is allowed be null</param>
+        public static void assertNullArguments(object[] args, bool[] isNull)
+        {
+            if (object.ReferenceEquals(args, null)) throw new ArgumentNullException("args");
+            if (object.ReferenceEquals(isNull, null)) throw new ArgumentNullException("isNull");
+            if (args.Length != isNull.Length) throw new CaptainALMConsoleException("The argument count is incorrect.");
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (object.ReferenceEquals(args[i], null) && !isNull[i]) throw new CaptainALMConsoleException("The argument at position " + (i + 1).ToString() + " is null and it should be not null .");
             }
         }
     }

@@ -12,6 +12,8 @@ namespace captainalm.calmcmd
         internal static ISyntax currentSyntax;
         internal static object slockCommandStack = new object();
         internal static Stack<string> CommandStack = new Stack<string>();
+        internal static InputRequired _ir;
+        internal static object slockir = new object();
 
         /// <summary>
         /// Provides a delegate to return an object from an executed command
@@ -35,6 +37,31 @@ namespace captainalm.calmcmd
         /// This event is raised when the commands remaining is updated
         /// </summary>
         public static event StatusReturner StatusUpdate;
+        /// <summary>
+        /// Provides a delegate to return a string which was entered by the user
+        /// </summary>
+        /// <returns>The entered string</returns>
+        public delegate string InputRequired();
+        /// <summary>
+        /// This property is used to hold the InputRequired delegate that's raised when an input is required
+        /// </summary>
+        public static InputRequired InputRequiredHandler
+        {
+            get
+            {
+                lock (slockir)
+                {
+                    return _ir;
+                }
+            }
+            set
+            {
+                lock (slockir)
+                {
+                    _ir = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Executes the given command string using the current syntax
@@ -43,21 +70,57 @@ namespace captainalm.calmcmd
         /// <returns>The result of the command</returns>
         public static object executeCommand(string cmdstr)
         {
-            if (object.ReferenceEquals(currentSyntax, null)) return cmdstr;
-            var com = API.invalidCommand;
-            var args = new string[0];
-            if (currentSyntax.decode(cmdstr, ref com, ref args))
+            lock (API.slocksyntax)
             {
+                if (object.ReferenceEquals(currentSyntax, null)) return cmdstr;
+            }
+            var com = API.invalidCommandName;
+            var args = new string[0];
+            var dr = false;
+            lock (API.slocksyntax)
+            {
+                dr = currentSyntax.decode(cmdstr, ref com, ref args);
+            }
+            if (dr)
+            {
+                ICommand cmd = Registry.getCommand(com);
+                if (object.ReferenceEquals(cmd, null)) return API.invalidCommand.run(new object[0]);
                 if (object.ReferenceEquals(args, null)) args = new string[0];
                 var argsp = new object[args.Length];
                 for (int i = 0; i < args.Length; i++) argsp[i] = executeCommand(args[i]);
-                ICommand cmd = Registry.getCommand(com);
-                if (object.ReferenceEquals(cmd, null)) return currentSyntax.argumentTypeConversion(cmdstr);
                 return cmd.run(argsp);
             }
             else
             {
-                return currentSyntax.argumentTypeConversion(cmdstr);
+                lock (API.slocksyntax)
+                {
+                    return currentSyntax.argumentTypeConversion(cmdstr);
+                }
+            }
+        }
+        /// <summary>
+        /// Executes the given command string using the specified syntax
+        /// </summary>
+        /// <param name="cmdstr">The command string</param>
+        /// <param name="synx">The syntax instance</param>
+        /// <returns>The result of the command</returns>
+        public static object executeCommand(string cmdstr, ISyntax synx)
+        {
+            if (object.ReferenceEquals(synx, null)) return cmdstr;
+            var com = API.invalidCommandName;
+            var args = new string[0];
+            if (synx.decode(cmdstr, ref com, ref args))
+            {
+                ICommand cmd = Registry.getCommand(com);
+                if (object.ReferenceEquals(cmd, null)) return API.invalidCommand.run(new object[0]);
+                if (object.ReferenceEquals(args, null)) args = new string[0];
+                var argsp = new object[args.Length];
+                for (int i = 0; i < args.Length; i++) argsp[i] = executeCommand(args[i], synx);
+                return cmd.run(argsp);
+            }
+            else
+            {
+                return synx.argumentTypeConversion(cmdstr);
             }
         }
         /// <summary>
@@ -85,7 +148,7 @@ namespace captainalm.calmcmd
                     Thread.Sleep(125);
                     while (CommandStack.Count > 0)
                     {
-                        var cmdln = API.invalidCommand;
+                        var cmdln = API.invalidCommandName;
                         var cs = StatusUpdate;
                         if (cs != null) cs.Invoke(CommandStack.Count);
                         lock (slockCommandStack)
@@ -109,7 +172,7 @@ namespace captainalm.calmcmd
                     }
                 }
                 catch (ThreadAbortException ex) { throw ex; }
-                catch (Exception ex) { }
+                catch (Exception) { }
             }
             API.InvokeConsoleEnd();
         }

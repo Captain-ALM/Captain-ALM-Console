@@ -428,5 +428,19 @@ namespace captainalm.calmcmd
             }
             return true;
         }
+
+        /// <summary>
+        /// Loads the specified standard library in.
+        /// </summary>
+        /// <param name="standardLibIn">The standard library to load</param>
+        public static void loadStandardLibrary(StandardLibrary standardLibIn)
+        {
+            if (object.ReferenceEquals(standardLibIn, null)) throw new ArgumentNullException("standardLibIn");
+            var stdlib = standardLibIn.getLibrary();
+            foreach (Command c in stdlib)
+            {
+                Registry.registerCommand(c);
+            }
+        }
     }
 }

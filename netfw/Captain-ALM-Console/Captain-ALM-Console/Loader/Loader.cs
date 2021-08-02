@@ -430,7 +430,7 @@ namespace captainalm.calmcmd
         }
 
         /// <summary>
-        /// Loads the specified standard library in.
+        /// Loads the specified standard library in
         /// </summary>
         /// <param name="standardLibIn">The standard library to load</param>
         public static void loadStandardLibrary(StandardLibrary standardLibIn)
@@ -441,6 +441,19 @@ namespace captainalm.calmcmd
             {
                 Registry.registerCommand(c);
             }
+        }
+
+        /// <summary>
+        /// Loads the default sytaxes in and sets the default syntax
+        /// </summary>
+        /// <param name="setLegacyDefault">Whether to set the legacy syntax as the default</param>
+        public static void loadDefaultSyntaxes(bool setLegacyDefault = false)
+        {
+            var ds = new DefaultSyntax();
+            var lds = new LegacyDefaultSyntax();
+            Registry.registerSyntax(ds);
+            Registry.registerSyntax(lds);
+            API.setSyntax((setLegacyDefault) ? lds.name : ds.name);
         }
     }
 }

@@ -55,6 +55,8 @@
     <Compile Include="Processor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Registry.cs" />
+    <Compile Include="StandardLibrary\DefaultSyntax.cs" />
+    <Compile Include="StandardLibrary\LegacyDefaultSyntax.cs" />
     <Compile Include="StandardLibrary\LegacyStandardLibrary.cs" />
     <Compile Include="StandardLibrary\StandardLibrary.cs" />
     <Compile Include="StylableString.cs" />

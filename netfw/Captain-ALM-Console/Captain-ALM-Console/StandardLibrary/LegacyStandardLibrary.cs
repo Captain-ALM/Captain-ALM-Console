@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace captainalm.calmcmd
 {
@@ -102,6 +100,10 @@ namespace captainalm.calmcmd
             return API.convertOutputTextToStylableString(args[0]);
         }
 
+        /// <summary>
+        /// Gets the array of commands that makes up the standard library
+        /// </summary>
+        /// <returns>An array of commands</returns>
         public override Command[] getLibrary()
         {
             var toret = new List<Command>(base.getLibrary());

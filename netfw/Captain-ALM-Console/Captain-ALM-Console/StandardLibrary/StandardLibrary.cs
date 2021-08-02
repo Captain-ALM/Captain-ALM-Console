@@ -1152,7 +1152,7 @@ namespace captainalm.calmcmd
             toret.Add(new Command(float_conv, "", "to_float", "to_float %input:System.Object% > System.Single"));
             toret.Add(new Command(double_conv, "", "to_double", "to_double %input:System.Object% > System.Double"));
             toret.Add(new Command(dec_conv, "", "to_dec", "to_dec %input:System.Object% > System.Decimal"));
-            toret.Add(new Command(char_conv, "", "to_char", "to_char %input:System.Object% > System.Char"));
+            toret.Add(new Command(char_conv, "", "to_char", "to_char %input:Intergral% > System.Char"));
             toret.Add(new Command(conv, "", "convert", "convert %input:System.Object% %target type:System.Type% > target type"));
             toret.Add(new Command(char_arr_conv, "", "to_char_array", "to_char_array %input:String% > System.Char[]"));
 
@@ -1214,6 +1214,11 @@ namespace captainalm.calmcmd
             toret.Add(new Command(str_arr_combine, "", "combine_string_array", "combine_string_array %array in:System.String[]% (deliminator in:String) > System.String"));
             toret.Add(new Command(str_split, "", "split_string", "split_string %input string:String% %deliminator:String% > System.String[]"));
             return toret.ToArray();
+        }
+
+        protected static bool NameComparer(IName x, string nom)
+        {
+            return ((x.owner.Equals("")) ? x.name : x.owner + "." + x.name).Equals(nom);
         }
     }
 }

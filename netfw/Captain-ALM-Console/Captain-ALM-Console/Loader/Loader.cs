@@ -433,6 +433,8 @@ namespace captainalm.calmcmd
         /// Loads the specified standard library in
         /// </summary>
         /// <param name="standardLibIn">The standard library to load</param>
+        /// <exception cref="System.ArgumentNullException">standardLibIn is null</exception>
+        /// <exception cref="captainalm.calmcmd.CaptainALMConsoleException">A command already exists</exception>
         public static void loadStandardLibrary(StandardLibrary standardLibIn)
         {
             if (object.ReferenceEquals(standardLibIn, null)) throw new ArgumentNullException("standardLibIn");

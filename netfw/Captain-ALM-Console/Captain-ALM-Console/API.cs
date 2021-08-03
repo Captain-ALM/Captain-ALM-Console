@@ -287,6 +287,7 @@ namespace captainalm.calmcmd
         /// </summary>
         /// <param name="objIn">The OutputText or OutputTextBlock to convert</param>
         /// <returns>The converted to stylable string</returns>
+        /// <exception cref="System.ArgumentNullException">objIn is null</exception>
         public static StylableString convertOutputTextToStylableString(object objIn)
         {
             if (object.ReferenceEquals(objIn, null)) throw new ArgumentNullException("objIn");
@@ -340,6 +341,8 @@ namespace captainalm.calmcmd
         /// </summary>
         /// <param name="args">The arguments to assert</param>
         /// <param name="types">The types to test with</param>
+        /// <exception cref="System.ArgumentNullException">args or types is null</exception>
+        /// <exception cref="captainalm.calmcmd.CaptainALMConsoleException">args assertion failure</exception>
         public static void assertArguments(object[] args, Type[] types)
         {
             if (object.ReferenceEquals(args, null)) throw new ArgumentNullException("args");
@@ -388,6 +391,8 @@ namespace captainalm.calmcmd
         /// </summary>
         /// <param name="args">The arguments to assert</param>
         /// <param name="isNull">The boolean values of if each item is allowed be null</param>
+        /// <exception cref="System.ArgumentNullException">args or isNull is null</exception>
+        /// <exception cref="captainalm.calmcmd.CaptainALMConsoleException">args assertion failure</exception>
         public static void assertNullArguments(object[] args, bool[] isNull)
         {
             if (object.ReferenceEquals(args, null)) throw new ArgumentNullException("args");

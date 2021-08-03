@@ -26,6 +26,7 @@ namespace captainalm.calmcmd
         /// <param name="owner">The command owner</param>
         /// <param name="name">The command name</param>
         /// <param name="help">The command help message</param>
+        /// <exception cref="System.ArgumentNullException">a provided parameter is null</exception>
         public Command(CommandDelegate commandIn, string owner, string name, string help)
         {
             if (object.ReferenceEquals(commandIn, null)) { throw new ArgumentNullException("commandIn"); }
@@ -48,6 +49,7 @@ namespace captainalm.calmcmd
         /// <summary>
         /// Returns the help string for this command
         /// </summary>
+        /// <exception cref="System.ArgumentNullException">the provided parameter is null</exception>
         public string help
         {
             get { return _help; }
@@ -56,6 +58,7 @@ namespace captainalm.calmcmd
         /// <summary>
         /// Returns the name of the command
         /// </summary>
+        /// <exception cref="System.ArgumentNullException">the provided parameter is null</exception>
         public string name
         {
             get { return _name; }
@@ -64,6 +67,7 @@ namespace captainalm.calmcmd
         /// <summary>
         /// Returns the owner of the command
         /// </summary>
+        /// <exception cref="System.ArgumentNullException">the provided parameter is null</exception>
         public string owner
         {
             get { return _owner; }

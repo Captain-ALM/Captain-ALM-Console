@@ -15,6 +15,7 @@ namespace captainalm.calmcmd
         /// </summary>
         /// <param name="ownerIn">The owner</param>
         /// <param name="nameIn">The name</param>
+        /// <exception cref="System.ArgumentNullException">a provided parameter is null</exception>
         public Name(string ownerIn, string nameIn)
             : this()
         {
@@ -25,6 +26,7 @@ namespace captainalm.calmcmd
         /// <summary>
         /// Returns the name of the class
         /// </summary>
+        /// <exception cref="System.ArgumentNullException">the provided parameter is null</exception>
         public string name
         {
             get { return (_name == null) ? "" : _name; }
@@ -33,6 +35,7 @@ namespace captainalm.calmcmd
         /// <summary>
         /// Returns the owner of the class
         /// </summary>
+        /// <exception cref="System.ArgumentNullException">the provided parameter is null</exception>
         public string owner
         {
             get { return (_owner == null) ? "" : _owner; }

@@ -16,11 +16,11 @@ namespace captainalm.calmcmd.console
 
         public static double ColorDistance(Color col1, Color col2)
         {
-            long rmean = ((long)col1.R + (long)col2.R) / 2;
-            long r = (long)col1.R - (long)col2.R;
-            long g = (long)col1.G - (long)col2.G;
-            long b = (long)col1.B - (long)col2.B;
-            return Math.Sqrt((((512 + rmean) * r * r) >> 8) + 4 * g * g + (((767 - rmean) * b * b) >> 8));
+            double rmean = ((double)col1.R + (double)col2.R) / 2.0D;
+            double r = (double)col1.R - (double)col2.R;
+            double g = (double)col1.G - (double)col2.G;
+            double b = (double)col1.B - (double)col2.B;
+            return Math.Sqrt(4 * Math.Pow(g, 2) + ((rmean < 128) ? 2 : 3) * Math.Pow(r, 2) + ((rmean < 128) ? 3 : 2) * Math.Pow(b, 2));
         }
 
         public Int32 ClosestColor(Color col)

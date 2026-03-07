@@ -122,7 +122,7 @@ namespace captainalm.calmcmd
 
         private static bool NameComparer(IName x, IName y)
         {
-           return (x.owner + "." + x.name).Equals(y.owner + "." + y.name);
+            return x.owner.Equals(y.owner) && x.name.Equals(y.name);
         }
 
         private static bool NameComparer(IName x, string nom)

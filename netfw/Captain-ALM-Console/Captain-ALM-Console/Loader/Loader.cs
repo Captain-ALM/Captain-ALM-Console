@@ -14,21 +14,35 @@ namespace captainalm.calmcmd
         private static object slockll = new object();
 
         /// <summary>
+        /// Represents the in-use logger implementation for command output.
+        /// </summary>
+        public static ILogger logger;
+
+        /// <summary>
         /// Checks if legacy systems are supported
         /// Required to be called to create the loader if support is available
         /// </summary>
         /// <returns>Whether legacy systems are supported</returns>
         public static bool isLegacySupported()
         {
-            //TODO: Construct Legacy Loader through reflection, allows for testing existance without hardcoding
             if (lav.HasValue) return lav.Value;
             var toret = false;
             try
             {
-                toret = LegacyLoader.legacySupported();
-                if (toret)
+                Type lsmType = Type.GetType("captainalm.calmcon.api.SetupMethodAttribute");
+                if (lsmType == null)
                 {
-                    lock (slockll) { lav = true; ll = new LegacyLoader(); }
+                    return false;
+                }
+                Type llType = Type.GetType("captainalm.calmcmd.LegacyLoader");
+                if (llType == null)
+                {
+                    return false;
+                }
+                lock (slockll)
+                {
+                    ll = (ILegacyLoader)llType.Assembly.CreateInstance(llType.FullName);
+                    lav = true;
                 }
             }
             catch (ThreadAbortException ex) { throw ex; }
@@ -196,6 +210,19 @@ namespace captainalm.calmcmd
         public static void unregisterpostcmdEvent()
         {
             API.ConsolePostCommand -= postcmdEvent;
+        }
+
+        /// <summary>
+        /// Gets a new instance of LegacyHookHolder.
+        /// </summary>
+        /// <returns>A new instance of LegacyHookHolder</returns>
+        public static LegacyHookHolder newLegacyHookHolder()
+        {
+            if ((!lav.HasValue) || lav == false) return null;
+            lock (slockll)
+            {
+                return ll.newHookHolder();
+            }
         }
 
         /// <summary>

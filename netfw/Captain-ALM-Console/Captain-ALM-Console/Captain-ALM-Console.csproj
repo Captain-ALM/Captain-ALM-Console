@@ -49,7 +49,6 @@
     <Compile Include="Interfaces\Wrappers\Name.cs" />
     <Compile Include="Loader\ExtensionSetupMethodAttribute.cs" />
     <Compile Include="Loader\Legacy\HookInfoWrapper.cs" />
-    <Compile Include="Loader\Legacy\HookTypesLegacy.cs" />
     <Compile Include="Loader\Legacy\IHookInfoWrapper.cs" />
     <Compile Include="Loader\Legacy\ILegacyLoader.cs" />
     <Compile Include="Loader\Legacy\LegacyLoader.cs" />

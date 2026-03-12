@@ -91,5 +91,20 @@ namespace captainalm.calmcmd
         /// </summary>
         /// <remarks></remarks>
         void hook_e_snx_remove();
+        /// <summary>
+        /// The hook form delegate.
+        /// </summary>
+        /// <remarks></remarks>
+        void hook_form();
+        /// <summary>
+        /// The hook out textbox delegate.
+        /// </summary>
+        /// <remarks></remarks>
+        void hook_cmd_txtbx();
+        /// <summary>
+        /// The hook out textbox delegate.
+        /// </summary>
+        /// <remarks></remarks>
+        void hook_out_txtbx();
     }
 }

@@ -19,5 +19,6 @@ namespace captainalm.calmcmd
         bool loadAssembly(Assembly assemblyIn);
         bool RegisterFirstLegacySyntaxesToStandardLibrary { get; set; }
         bool RegisterFirstLegacyCommandsToStandardLibrary { get; set; }
+        LegacyHookHolder newHookHolder();
     }
 }

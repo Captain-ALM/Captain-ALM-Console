@@ -11,25 +11,28 @@ namespace captainalm.calmcmd
         /// <summary>
         /// The hook information dictionary
         /// </summary>
-        public readonly Dictionary<String, captainalm.calmcon.api.HookInfo> hookInformation;
-        //TODO: Convert to HookInfoWrapper values.
+        public readonly Dictionary<String, IHookInfoWrapper> hookInformation;
         internal string libraryNameFFA = null;
+        private LegacyLoader ll;
 
-        internal LegacyHookHolder(IDictionary<string, captainalm.calmcon.api.HookInfo> dictIn) { hookInformation = new Dictionary<string, calmcon.api.HookInfo>(dictIn); }
-        /// <summary>
-        /// Creates a new instance of LegacyHookHolder
-        /// </summary>
-        public LegacyHookHolder() : this(new Dictionary<string, captainalm.calmcon.api.HookInfo>()) { }
-
-        /// <summary>
-        /// Returns the hookInfo of the libraryName that this holder was set to target
-        /// </summary>
-        /// <returns>The targeted hookInfo</returns>
-        public captainalm.calmcon.api.HookInfo fastAccessHookInfo()
+        internal LegacyHookHolder(IDictionary<string, IHookInfoWrapper> dictIn, LegacyLoader ll)
+        
         {
-            if (object.ReferenceEquals(libraryNameFFA, null)) return default(captainalm.calmcon.api.HookInfo);
+            this.ll = ll;
+            hookInformation = new Dictionary<string, IHookInfoWrapper>(dictIn); 
+        }
+
+        internal LegacyHookHolder(LegacyLoader ll) : this(new Dictionary<string, IHookInfoWrapper>(), ll) { }
+
+        /// <summary>
+        /// Returns the wrappedHookInfo of the libraryName that this holder was set to target
+        /// </summary>
+        /// <returns>The targeted wrappedHookInfo or null</returns>
+        public IHookInfoWrapper fastAccessHookInfo()
+        {
+            if (object.ReferenceEquals(libraryNameFFA, null)) return null;
             if (hookInformation.ContainsKey(libraryNameFFA)) return hookInformation[libraryNameFFA];
-            return default(captainalm.calmcon.api.HookInfo);
+            return null;
         }
         /// <summary>
         /// Gets the targeted libraryName, if any, of the holder
@@ -48,7 +51,7 @@ namespace captainalm.calmcmd
         /// <returns>A copy of the object</returns>
         public object Clone()
         {
-            return new LegacyHookHolder(this.hookInformation);
+            return new LegacyHookHolder(this.hookInformation, this.ll);
         }
     }
 

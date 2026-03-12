@@ -6,7 +6,7 @@ using System.Text;
 namespace captainalm.calmcmd
 {
     /// <summary>
-    /// Provides a logging access interface.
+    /// Provides a logging access interface for command output.
     /// </summary>
     public interface ILogger
     {

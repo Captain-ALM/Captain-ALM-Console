@@ -7,7 +7,7 @@ namespace captainalm.calmcmd
 {
     internal sealed class LegacyLoader : ILegacyLoader
     {
-        private LegacyHookHolder hookHolder = new LegacyHookHolder();
+        private LegacyHookHolder hookHolder;
         private LegacyHookRunnerHolder _hookRunnerHolder;
         private bool registerFirstLegacySyntaxesToStandardLibrary = true;
         private bool registerFirstLegacyCommandsToStandardLibrary = true;
@@ -30,23 +30,15 @@ namespace captainalm.calmcmd
         private object slockecmdregk = new object();
         private object slockesnxregk = new object();
         //Define the legacy hooks
-        private captainalm.calmcon.api.Types.RunCommandHook runcommandhook;
-        private captainalm.calmcon.api.Types.AddExternalCommandHook addecmdhook;
-        private captainalm.calmcon.api.Types.AddExternalSyntaxHook addesnxhook;
-        private captainalm.calmcon.api.Types.RemoveExternalCommandHook remecmdhook;
-        private captainalm.calmcon.api.Types.RemoveExternalSyntaxHook remesnxhook;
-        private captainalm.calmcon.api.Types.ListExternalCommandsHook lsecmdhook;
-        private captainalm.calmcon.api.Types.ListExternalSyntaxesHook lsesnxhook;
-        private captainalm.calmcon.api.Types.ReadOutputHook rohook;
-        private captainalm.calmcon.api.Types.WriteOutputHook wohook;
-        //TODO: The above 2 need ILogger definitions and the instance passed in and stored (Or stored in Registry)
-        //TODO: These hooks may need to be public, see HookInfoWrapper; note they are internally protected
-        //Checks if the legacy system is actually supported:
-        public static bool legacySupported()
-        {
-            return new captainalm.calmcon.api.LibrarySetup().GetType() == typeof(captainalm.calmcon.api.LibrarySetup);
-        }
-        //TODO: See loader for dealing with this function
+        public captainalm.calmcon.api.Types.RunCommandHook runcommandhook;
+        public captainalm.calmcon.api.Types.AddExternalCommandHook addecmdhook;
+        public captainalm.calmcon.api.Types.AddExternalSyntaxHook addesnxhook;
+        public captainalm.calmcon.api.Types.RemoveExternalCommandHook remecmdhook;
+        public captainalm.calmcon.api.Types.RemoveExternalSyntaxHook remesnxhook;
+        public captainalm.calmcon.api.Types.ListExternalCommandsHook lsecmdhook;
+        public captainalm.calmcon.api.Types.ListExternalSyntaxesHook lsesnxhook;
+        public captainalm.calmcon.api.Types.ReadOutputHook rohook;
+        public captainalm.calmcon.api.Types.WriteOutputHook wohook;
 
         public bool RegisterFirstLegacySyntaxesToStandardLibrary
         {
@@ -75,6 +67,7 @@ namespace captainalm.calmcmd
         //Constructor:
         public LegacyLoader()
         {
+            hookHolder = new LegacyHookHolder(this);
             runcommandhook = delegate(string c, string[] a)
             {
                 ICommand cmd = Registry.getCommand(c);
@@ -185,6 +178,20 @@ namespace captainalm.calmcmd
                 }
                 return toret.ToArray();
             };
+            rohook = delegate() 
+            {
+                ILogger llog = Loader.logger;
+                if (object.ReferenceEquals(llog, null))
+                    return "";
+                return llog.getLog();
+            };
+            wohook = delegate(captainalm.calmcon.api.OutputText str)
+            {
+                ILogger llog = Loader.logger;
+                if (object.ReferenceEquals(llog, null))
+                    return;
+                llog.writeEntry(convertOutputTextToStylableString(str));
+            };
         }
 
         public bool loadAssembly(Assembly assemblyIn)
@@ -208,19 +215,19 @@ namespace captainalm.calmcmd
                 var c = hookHolder.hookInformation[t];
                 var v = (LegacyHookHolder)hookHolder.Clone();
                 v.libraryNameFFA = t;
-                if (!object.ReferenceEquals(c.hook_runcommand, null)) c.hook_runcommand.Invoke(ref runcommandhook);
-                if (!object.ReferenceEquals(c.hook_readoutput, null)) if (!object.ReferenceEquals(_hookRunnerHolder.GetReadOutputHook, null)) _hookRunnerHolder.GetReadOutputHook.Invoke(v);
-                if (!object.ReferenceEquals(c.hook_writeoutput, null)) if (!object.ReferenceEquals(_hookRunnerHolder.GetWriteOutputHook, null)) _hookRunnerHolder.GetWriteOutputHook.Invoke(v);
-                if (!object.ReferenceEquals(c.hook_e_cmd_add, null)) c.hook_e_cmd_add.Invoke(ref addecmdhook);
-                if (!object.ReferenceEquals(c.hook_e_cmd_list, null)) c.hook_e_cmd_list.Invoke(ref lsecmdhook);
-                if (!object.ReferenceEquals(c.hook_e_cmd_remove, null)) c.hook_e_cmd_remove.Invoke(ref remecmdhook);
-                if (!object.ReferenceEquals(c.hook_e_snx_add, null)) c.hook_e_snx_add.Invoke(ref addesnxhook);
-                if (!object.ReferenceEquals(c.hook_e_snx_list, null)) c.hook_e_snx_list.Invoke(ref lsesnxhook);
-                if (!object.ReferenceEquals(c.hook_e_snx_remove, null)) c.hook_e_snx_remove.Invoke(ref remesnxhook);
-                if (!object.ReferenceEquals(c.hook_form, null)) if (!object.ReferenceEquals(_hookRunnerHolder.FormHook, null)) _hookRunnerHolder.FormHook.Invoke(v);
-                if (!object.ReferenceEquals(c.hook_cmd_txtbx, null)) if (!object.ReferenceEquals(_hookRunnerHolder.CommandTextboxHook, null)) _hookRunnerHolder.CommandTextboxHook.Invoke(v);
-                if (!object.ReferenceEquals(c.hook_out_txtbx, null)) if (!object.ReferenceEquals(_hookRunnerHolder.OutputTextboxHook, null)) _hookRunnerHolder.OutputTextboxHook.Invoke(v);
-                if (!object.ReferenceEquals(c.hook_programstart, null)) c.hook_programstart.Invoke();
+                c.hook_runcommand();
+                c.hook_readoutput();
+                c.hook_writeoutput();
+                c.hook_e_cmd_add();
+                c.hook_e_cmd_list();
+                c.hook_e_cmd_remove();
+                c.hook_e_snx_add();
+                c.hook_e_snx_list();
+                c.hook_e_snx_remove();
+                c.hook_form();
+                c.hook_cmd_txtbx();
+                c.hook_out_txtbx();
+                c.hook_programstart();
             }
         }
 
@@ -228,8 +235,7 @@ namespace captainalm.calmcmd
         {
             foreach (string t in hookHolder.hookInformation.Keys)
             {
-                var c = hookHolder.hookInformation[t];
-                if (!object.ReferenceEquals(c.hook_programstop, null)) c.hook_programstop.Invoke();
+                hookHolder.hookInformation[t].hook_programstop();
             }
         }
 
@@ -237,8 +243,7 @@ namespace captainalm.calmcmd
         {
             foreach (string t in hookHolder.hookInformation.Keys)
             {
-                var c = hookHolder.hookInformation[t];
-                if (!object.ReferenceEquals(c.hook_command_preexecute, null)) c.hook_command_preexecute.Invoke(cmdln);
+                hookHolder.hookInformation[t].hook_command_preexecute(cmdln);
             }
             return true;
         }
@@ -247,8 +252,7 @@ namespace captainalm.calmcmd
         {
             foreach (string t in hookHolder.hookInformation.Keys)
             {
-                var c = hookHolder.hookInformation[t];
-                if (!object.ReferenceEquals(c.hook_command_postexecute, null)) c.hook_command_postexecute.Invoke(cmdln, object.ReferenceEquals(objOut, null) ? (captainalm.calmcon.api.OutputText)"" : (objOut.GetType() == typeof(string) ? (captainalm.calmcon.api.OutputText)((string)objOut) : (objOut.GetType() == typeof(captainalm.calmcon.api.OutputText) ? (captainalm.calmcon.api.OutputText)objOut : (captainalm.calmcon.api.OutputText)objOut.ToString())));
+                hookHolder.hookInformation[t].hook_command_postexecute(cmdln, object.ReferenceEquals(objOut, null) ? (StylableString)"" : (objOut.GetType() == typeof(string) ? (StylableString)((string)objOut) : (objOut.GetType() == typeof(captainalm.calmcon.api.OutputText) ? LegacyLoader.ConvertOutputTextToStylableString((captainalm.calmcon.api.OutputText)objOut) : (objOut.GetType() == typeof(StylableString) ? (StylableString)objOut : (StylableString)objOut.ToString()))));
             }
         }
 
@@ -363,7 +367,7 @@ namespace captainalm.calmcmd
                 }
                 catch (ThreadAbortException ex) { throw ex; }
                 catch (Exception) { return false; }
-                if (!hookHolder.hookInformation.ContainsKey(libs.hook_info.name)) hookHolder.hookInformation.Add(libs.hook_info.name, libs.hook_info);
+                if (!hookHolder.hookInformation.ContainsKey(libs.hook_info.name)) hookHolder.hookInformation.Add(libs.hook_info.name, new HookInfoWrapper(libs.hook_info, this));
                 if (libs.syntaxes != null) {
                     foreach (captainalm.calmcon.api.ISyntax c in libs.syntaxes)
                     {
@@ -424,6 +428,11 @@ namespace captainalm.calmcmd
             {
                 _hookRunnerHolder = value;
             }
+        }
+
+        public LegacyHookHolder newHookHolder()
+        {
+            return new LegacyHookHolder(this);
         }
 
         public StylableString convertOutputTextToStylableString(object objIn)

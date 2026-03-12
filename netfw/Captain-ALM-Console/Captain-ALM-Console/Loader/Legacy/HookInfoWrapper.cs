@@ -8,33 +8,11 @@ namespace captainalm.calmcmd
     internal sealed class HookInfoWrapper : IHookInfoWrapper
     {
         public captainalm.calmcon.api.HookInfo hookinfo;
-        //Define the legacy hooks
-        private captainalm.calmcon.api.Types.RunCommandHook runcommandhook;
-        private captainalm.calmcon.api.Types.AddExternalCommandHook addecmdhook;
-        private captainalm.calmcon.api.Types.AddExternalSyntaxHook addesnxhook;
-        private captainalm.calmcon.api.Types.RemoveExternalCommandHook remecmdhook;
-        private captainalm.calmcon.api.Types.RemoveExternalSyntaxHook remesnxhook;
-        private captainalm.calmcon.api.Types.ListExternalCommandsHook lsecmdhook;
-        private captainalm.calmcon.api.Types.ListExternalSyntaxesHook lsesnxhook;
-        private captainalm.calmcon.api.Types.ReadOutputHook rohook;
-        private captainalm.calmcon.api.Types.WriteOutputHook wohook;
-        // TODO: Just access these from a passed legacy loader (Then refs can be global)
-        public HookInfoWrapper(captainalm.calmcon.api.HookInfo hookinfo, captainalm.calmcon.api.Types.RunCommandHook runcommandhook,
-            captainalm.calmcon.api.Types.AddExternalCommandHook addecmdhook, captainalm.calmcon.api.Types.AddExternalSyntaxHook addesnxhook,
-            captainalm.calmcon.api.Types.RemoveExternalCommandHook remecmdhook, captainalm.calmcon.api.Types.RemoveExternalSyntaxHook remesnxhook,
-            captainalm.calmcon.api.Types.ListExternalCommandsHook lsecmdhook, captainalm.calmcon.api.Types.ListExternalSyntaxesHook lsesnxhook,
-            captainalm.calmcon.api.Types.ReadOutputHook rohook, captainalm.calmcon.api.Types.WriteOutputHook wohook)
+        private LegacyLoader ll;
+        public HookInfoWrapper(captainalm.calmcon.api.HookInfo hookinfo, LegacyLoader ll)
         {
             this.hookinfo = hookinfo;
-            this.runcommandhook = runcommandhook;
-            this.addecmdhook = addecmdhook;
-            this.addesnxhook = addesnxhook;
-            this.remecmdhook = remecmdhook;
-            this.remesnxhook = remesnxhook;
-            this.lsecmdhook = lsecmdhook;
-            this.lsesnxhook = lsesnxhook;
-            this.rohook = rohook;
-            this.wohook = wohook;
+            this.ll = ll;
         }
 
         public string name
@@ -51,72 +29,106 @@ namespace captainalm.calmcmd
 
         public void hook_programstart()
         {
-            hookinfo.hook_programstart();
+            if (object.ReferenceEquals(hookinfo.hook_programstart, null))
+                return;
+            hookinfo.hook_programstart.Invoke();
         }
 
         public void hook_programstop()
         {
-            hookinfo.hook_programstop();
+            if (object.ReferenceEquals(hookinfo.hook_programstop, null))
+                return;
+            hookinfo.hook_programstop.Invoke();
         }
 
         public void hook_command_preexecute(string commandstr)
         {
-            hookinfo.hook_command_preexecute(commandstr);
+            if (object.ReferenceEquals(hookinfo.hook_command_preexecute, null))
+                return;
+            hookinfo.hook_command_preexecute.Invoke(commandstr);
         }
 
         public void hook_command_postexecute(string commandstr, StylableString returnval)
         {
-            hookinfo.hook_command_postexecute(commandstr, (captainalm.calmcon.api.OutputText)LegacyLoader.ConvertStylableStringToOutputText(returnval));
+            if (object.ReferenceEquals(hookinfo.hook_command_postexecute, null))
+                return;
+            hookinfo.hook_command_postexecute.Invoke(commandstr, (captainalm.calmcon.api.OutputText)LegacyLoader.ConvertStylableStringToOutputText(returnval));
         }
 
         public void hook_runcommand()
         {
-            hookinfo.hook_runcommand(ref this.runcommandhook);
+            if (object.ReferenceEquals(hookinfo.hook_runcommand, null) || object.ReferenceEquals(ll.runcommandhook, null))
+                return;
+            hookinfo.hook_runcommand.Invoke(ref ll.runcommandhook);
         }
 
         public void hook_writeoutput()
         {
-            hookinfo.hook_writeoutput(ref this.wohook);
+            if (object.ReferenceEquals(hookinfo.hook_writeoutput, null) || object.ReferenceEquals(ll.wohook, null))
+                return;
+            hookinfo.hook_writeoutput.Invoke(ref ll.wohook);
         }
 
         public void hook_readoutput()
         {
-            hookinfo.hook_readoutput(ref this.rohook);
+            if (object.ReferenceEquals(hookinfo.hook_readoutput, null) || object.ReferenceEquals(ll.rohook, null))
+                return;
+            hookinfo.hook_readoutput.Invoke(ref ll.rohook);
         }
 
         public void hook_rk(string key)
         {
-            hookinfo.hook_rk(key);
+            if (object.ReferenceEquals(hookinfo.hook_rk, null))
+                return;
+            hookinfo.hook_rk.Invoke(key);
         }
 
         public void hook_e_cmd_add()
         {
-            hookinfo.hook_e_cmd_add(ref this.addecmdhook);
+            if (object.ReferenceEquals(hookinfo.hook_e_cmd_add, null) || object.ReferenceEquals(ll.addecmdhook, null))
+                return;
+            hookinfo.hook_e_cmd_add.Invoke(ref ll.addecmdhook);
         }
 
         public void hook_e_cmd_list()
         {
-            hookinfo.hook_e_cmd_list(ref this.lsecmdhook);
+            if (object.ReferenceEquals(hookinfo.hook_e_cmd_list, null) || object.ReferenceEquals(ll.lsecmdhook, null))
+                return;
+            hookinfo.hook_e_cmd_list.Invoke(ref ll.lsecmdhook);
         }
 
         public void hook_e_cmd_remove()
         {
-            hookinfo.hook_e_cmd_remove(ref this.remecmdhook);
+            if (object.ReferenceEquals(hookinfo.hook_e_cmd_remove, null) || object.ReferenceEquals(ll.remecmdhook, null))
+                return;
+            hookinfo.hook_e_cmd_remove.Invoke(ref ll.remecmdhook);
         }
 
         public void hook_e_snx_add()
         {
-            hookinfo.hook_e_snx_add(ref this.addesnxhook);
+            if (object.ReferenceEquals(hookinfo.hook_e_snx_add, null) || object.ReferenceEquals(ll.addesnxhook, null))
+                return;
+            hookinfo.hook_e_snx_add.Invoke(ref ll.addesnxhook);
         }
 
         public void hook_e_snx_list()
         {
-            hookinfo.hook_e_snx_list(ref this.lsesnxhook);
+            if (object.ReferenceEquals(hookinfo.hook_e_snx_list, null) || object.ReferenceEquals(ll.lsesnxhook, null))
+                return;
+            hookinfo.hook_e_snx_list.Invoke(ref ll.lsesnxhook);
         }
 
         public void hook_e_snx_remove()
         {
-            hookinfo.hook_e_snx_remove(ref this.remesnxhook);
+            if (object.ReferenceEquals(hookinfo.hook_e_snx_remove, null) || object.ReferenceEquals(ll.remesnxhook, null))
+                return;
+            hookinfo.hook_e_snx_remove.Invoke(ref ll.remesnxhook);
         }
+
+        public void hook_form() {}
+
+        public void hook_cmd_txtbx() {}
+
+        public void hook_out_txtbx() {}
     }
 }

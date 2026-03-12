@@ -5,4 +5,4 @@ This also contains a Windows Forms GUI, a Console / Terminal GUI and Standard Pi
 
 The console library supports the older API provided by [CALM-Console](https://github.com/Captain-ALM/CALM-Console).
 
-(C) Captain ALM 2021 {Under the BSD - 2 Clause License}
+(C) Captain ALM 2026 {Under the BSD - 2 Clause License}

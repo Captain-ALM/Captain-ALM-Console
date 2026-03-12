@@ -9,7 +9,7 @@ namespace captainalm.calmcmd
     /// </summary>
     public static class Loader
     {
-        private static LegacyLoader ll;
+        private static ILegacyLoader ll;
         private static bool? lav = null;
         private static object slockll = new object();
 
@@ -20,6 +20,7 @@ namespace captainalm.calmcmd
         /// <returns>Whether legacy systems are supported</returns>
         public static bool isLegacySupported()
         {
+            //TODO: Construct Legacy Loader through reflection, allows for testing existance without hardcoding
             if (lav.HasValue) return lav.Value;
             var toret = false;
             try
@@ -212,7 +213,7 @@ namespace captainalm.calmcmd
                     {
                         if (!object.ReferenceEquals(ll, null))
                         {
-                            return ll.hookHolder;
+                            return ll.getHookHolder();
                         }
                     }
                     catch (ThreadAbortException ex) { throw ex; }
@@ -283,7 +284,7 @@ namespace captainalm.calmcmd
                 {
                     if (!object.ReferenceEquals(ll, null))
                     {
-                        return ll.registerFirstLegacySyntaxesToStandardLibrary;
+                        return ll.RegisterFirstLegacySyntaxesToStandardLibrary;
                     }
                 }
                 return false;
@@ -295,7 +296,7 @@ namespace captainalm.calmcmd
                 {
                     if (!object.ReferenceEquals(ll, null))
                     {
-                        ll.registerFirstLegacySyntaxesToStandardLibrary = value;
+                        ll.RegisterFirstLegacySyntaxesToStandardLibrary = value;
                     }
                 }
             }
@@ -313,7 +314,7 @@ namespace captainalm.calmcmd
                 {
                     if (!object.ReferenceEquals(ll, null))
                     {
-                        return ll.registerFirstLegacyCommandsToStandardLibrary;
+                        return ll.RegisterFirstLegacyCommandsToStandardLibrary;
                     }
                 }
                 return false;
@@ -325,7 +326,7 @@ namespace captainalm.calmcmd
                 {
                     if (!object.ReferenceEquals(ll, null))
                     {
-                        ll.registerFirstLegacyCommandsToStandardLibrary = value;
+                        ll.RegisterFirstLegacyCommandsToStandardLibrary = value;
                     }
                 }
             }

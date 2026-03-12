@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Captain ALM")]
 [assembly: AssemblyProduct("Captain-ALM-Console")]
-[assembly: AssemblyCopyright("Copyright © Captain ALM 2021")]
+[assembly: AssemblyCopyright("Copyright © Captain ALM 2026")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

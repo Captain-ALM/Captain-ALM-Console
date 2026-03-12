@@ -12,6 +12,7 @@ namespace captainalm.calmcmd
         /// The hook information dictionary
         /// </summary>
         public readonly Dictionary<String, captainalm.calmcon.api.HookInfo> hookInformation;
+        //TODO: Convert to HookInfoWrapper values.
         internal string libraryNameFFA = null;
 
         internal LegacyHookHolder(IDictionary<string, captainalm.calmcon.api.HookInfo> dictIn) { hookInformation = new Dictionary<string, calmcon.api.HookInfo>(dictIn); }

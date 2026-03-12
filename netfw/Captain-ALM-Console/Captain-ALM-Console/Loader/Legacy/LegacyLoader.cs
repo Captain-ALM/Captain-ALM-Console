@@ -5,12 +5,12 @@ using System.Threading;
 
 namespace captainalm.calmcmd
 {
-    internal sealed class LegacyLoader
+    internal sealed class LegacyLoader : ILegacyLoader
     {
-        public LegacyHookHolder hookHolder = new LegacyHookHolder();
-        public LegacyHookRunnerHolder hookRunnerHolder;
-        public bool registerFirstLegacySyntaxesToStandardLibrary = true;
-        public bool registerFirstLegacyCommandsToStandardLibrary = true;
+        private LegacyHookHolder hookHolder = new LegacyHookHolder();
+        private LegacyHookRunnerHolder _hookRunnerHolder;
+        private bool registerFirstLegacySyntaxesToStandardLibrary = true;
+        private bool registerFirstLegacyCommandsToStandardLibrary = true;
         //Previous values of the manipulator during the last check:
         private Stack<string> OldCommandStack;
         private Dictionary<string, string> OldVariableDictionary;
@@ -37,11 +37,39 @@ namespace captainalm.calmcmd
         private captainalm.calmcon.api.Types.RemoveExternalSyntaxHook remesnxhook;
         private captainalm.calmcon.api.Types.ListExternalCommandsHook lsecmdhook;
         private captainalm.calmcon.api.Types.ListExternalSyntaxesHook lsesnxhook;
-
+        private captainalm.calmcon.api.Types.ReadOutputHook rohook;
+        private captainalm.calmcon.api.Types.WriteOutputHook wohook;
+        //TODO: The above 2 need ILogger definitions and the instance passed in and stored (Or stored in Registry)
+        //TODO: These hooks may need to be public, see HookInfoWrapper; note they are internally protected
         //Checks if the legacy system is actually supported:
         public static bool legacySupported()
         {
             return new captainalm.calmcon.api.LibrarySetup().GetType() == typeof(captainalm.calmcon.api.LibrarySetup);
+        }
+        //TODO: See loader for dealing with this function
+
+        public bool RegisterFirstLegacySyntaxesToStandardLibrary
+        {
+            get
+            {
+                return registerFirstLegacySyntaxesToStandardLibrary;
+            }
+            set
+            {
+                registerFirstLegacySyntaxesToStandardLibrary = value;
+            }
+        }
+
+        public bool RegisterFirstLegacyCommandsToStandardLibrary
+        {
+            get
+            {
+                return registerFirstLegacyCommandsToStandardLibrary;
+            }
+            set
+            {
+                registerFirstLegacyCommandsToStandardLibrary = value;
+            }
         }
 
         //Constructor:
@@ -159,29 +187,6 @@ namespace captainalm.calmcmd
             };
         }
 
-        public StylableString convertOutputTextToStylableString(object objIn)
-        {
-            if (objIn.GetType() == typeof(captainalm.calmcon.api.OutputText))
-            {
-                var oi = (captainalm.calmcon.api.OutputText)objIn;
-                var oia = oi.ToOutputTextBlocks();
-                if (oia.Length > 1)
-                {
-                    for (int i = 1; i < oia.Length; i++)
-                    {
-                        oia[0].text += oia[i].text;
-                    }
-                }
-                if (oia.Length > 0) return this.convertOutputTextToStylableString(oia[0]);
-            }
-            else if (objIn.GetType() == typeof(captainalm.calmcon.api.OutputTextBlock))
-            {
-                var oi = (captainalm.calmcon.api.OutputTextBlock) objIn;
-                return new StylableString(oi.text) { backcolor = System.Drawing.Color.Empty, forecolor = oi.forecolor, bold = oi.bold, italic = oi.italic, strikeout = oi.strikeout, underline = oi.underline };
-            }
-            return default(StylableString);
-        }
-
         public bool loadAssembly(Assembly assemblyIn)
         {
             if (object.ReferenceEquals(assemblyIn, null)) return false;
@@ -204,17 +209,17 @@ namespace captainalm.calmcmd
                 var v = (LegacyHookHolder)hookHolder.Clone();
                 v.libraryNameFFA = t;
                 if (!object.ReferenceEquals(c.hook_runcommand, null)) c.hook_runcommand.Invoke(ref runcommandhook);
-                if (!object.ReferenceEquals(c.hook_readoutput, null)) if (!object.ReferenceEquals(hookRunnerHolder.GetReadOutputHook, null)) hookRunnerHolder.GetReadOutputHook.Invoke(v);
-                if (!object.ReferenceEquals(c.hook_writeoutput, null)) if (!object.ReferenceEquals(hookRunnerHolder.GetWriteOutputHook, null)) hookRunnerHolder.GetWriteOutputHook.Invoke(v);
+                if (!object.ReferenceEquals(c.hook_readoutput, null)) if (!object.ReferenceEquals(_hookRunnerHolder.GetReadOutputHook, null)) _hookRunnerHolder.GetReadOutputHook.Invoke(v);
+                if (!object.ReferenceEquals(c.hook_writeoutput, null)) if (!object.ReferenceEquals(_hookRunnerHolder.GetWriteOutputHook, null)) _hookRunnerHolder.GetWriteOutputHook.Invoke(v);
                 if (!object.ReferenceEquals(c.hook_e_cmd_add, null)) c.hook_e_cmd_add.Invoke(ref addecmdhook);
                 if (!object.ReferenceEquals(c.hook_e_cmd_list, null)) c.hook_e_cmd_list.Invoke(ref lsecmdhook);
                 if (!object.ReferenceEquals(c.hook_e_cmd_remove, null)) c.hook_e_cmd_remove.Invoke(ref remecmdhook);
                 if (!object.ReferenceEquals(c.hook_e_snx_add, null)) c.hook_e_snx_add.Invoke(ref addesnxhook);
                 if (!object.ReferenceEquals(c.hook_e_snx_list, null)) c.hook_e_snx_list.Invoke(ref lsesnxhook);
                 if (!object.ReferenceEquals(c.hook_e_snx_remove, null)) c.hook_e_snx_remove.Invoke(ref remesnxhook);
-                if (!object.ReferenceEquals(c.hook_form, null)) if (!object.ReferenceEquals(hookRunnerHolder.FormHook, null)) hookRunnerHolder.FormHook.Invoke(v);
-                if (!object.ReferenceEquals(c.hook_cmd_txtbx, null)) if (!object.ReferenceEquals(hookRunnerHolder.CommandTextboxHook, null)) hookRunnerHolder.CommandTextboxHook.Invoke(v);
-                if (!object.ReferenceEquals(c.hook_out_txtbx, null)) if (!object.ReferenceEquals(hookRunnerHolder.OutputTextboxHook, null)) hookRunnerHolder.OutputTextboxHook.Invoke(v);
+                if (!object.ReferenceEquals(c.hook_form, null)) if (!object.ReferenceEquals(_hookRunnerHolder.FormHook, null)) _hookRunnerHolder.FormHook.Invoke(v);
+                if (!object.ReferenceEquals(c.hook_cmd_txtbx, null)) if (!object.ReferenceEquals(_hookRunnerHolder.CommandTextboxHook, null)) _hookRunnerHolder.CommandTextboxHook.Invoke(v);
+                if (!object.ReferenceEquals(c.hook_out_txtbx, null)) if (!object.ReferenceEquals(_hookRunnerHolder.OutputTextboxHook, null)) _hookRunnerHolder.OutputTextboxHook.Invoke(v);
                 if (!object.ReferenceEquals(c.hook_programstart, null)) c.hook_programstart.Invoke();
             }
         }
@@ -402,6 +407,56 @@ namespace captainalm.calmcmd
                 toret = ckey;
             }
             return toret;
+        }
+
+        public LegacyHookHolder getHookHolder()
+        {
+            return hookHolder;
+        }
+
+        public LegacyHookRunnerHolder hookRunnerHolder
+        {
+            get
+            {
+                return _hookRunnerHolder;
+            }
+            set
+            {
+                _hookRunnerHolder = value;
+            }
+        }
+
+        public StylableString convertOutputTextToStylableString(object objIn)
+        {
+            return LegacyLoader.ConvertOutputTextToStylableString(objIn);
+        }
+
+        public static StylableString ConvertOutputTextToStylableString(object objIn)
+        {
+            if (objIn.GetType() == typeof(captainalm.calmcon.api.OutputText))
+            {
+                var oi = (captainalm.calmcon.api.OutputText)objIn;
+                var oia = oi.ToOutputTextBlocks();
+                if (oia.Length > 1)
+                {
+                    for (int i = 1; i < oia.Length; i++)
+                    {
+                        oia[0].text += oia[i].text;
+                    }
+                }
+                if (oia.Length > 0) return LegacyLoader.ConvertOutputTextToStylableString(oia[0]);
+            }
+            else if (objIn.GetType() == typeof(captainalm.calmcon.api.OutputTextBlock))
+            {
+                var oi = (captainalm.calmcon.api.OutputTextBlock)objIn;
+                return new StylableString(oi.text) { backcolor = System.Drawing.Color.Empty, forecolor = oi.forecolor, bold = oi.bold, italic = oi.italic, strikeout = oi.strikeout, underline = oi.underline };
+            }
+            return default(StylableString);
+        }
+
+        public static object ConvertStylableStringToOutputText(StylableString strIn)
+        {
+            return new captainalm.calmcon.api.OutputText(strIn.text, strIn.forecolor, strIn.bold, strIn.italic, strIn.underline, strIn.strikeout);
         }
     }
 }

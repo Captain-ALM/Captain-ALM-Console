@@ -145,7 +145,7 @@ namespace captainalm.calmcmd
             {
                 try
                 {
-                    Thread.Sleep(125);
+                    Thread.Sleep(125); // Cannot use Monitor in order to provide legacy support.
                     while (CommandStack.Count > 0)
                     {
                         var cmdln = API.invalidCommandName;

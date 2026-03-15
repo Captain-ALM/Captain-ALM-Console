@@ -61,10 +61,7 @@ namespace captainalm.calmcmd
             {
                 try
                 {
-                    if (!object.ReferenceEquals(ll, null))
-                    {
-                        return ll.convertOutputTextToStylableString(objIn);
-                    }
+                    return ll.convertOutputTextToStylableString(objIn);
                 }
                 catch (ThreadAbortException ex) { throw ex; }
                 catch (Exception)
@@ -82,10 +79,7 @@ namespace captainalm.calmcmd
             {
                 try
                 {
-                    if (!object.ReferenceEquals(ll, null))
-                    {
-                        ll.executeStartHooks();
-                    }
+                    ll.executeStartHooks();
                 }
                 catch (ThreadAbortException ex) { throw ex; }
                 catch (Exception)
@@ -116,10 +110,7 @@ namespace captainalm.calmcmd
             {
                 try
                 {
-                    if (!object.ReferenceEquals(ll, null))
-                    {
-                        ll.executeEndHooks();
-                    }
+                    ll.executeEndHooks();
                 }
                 catch (ThreadAbortException ex) { throw ex; }
                 catch (Exception)
@@ -150,10 +141,7 @@ namespace captainalm.calmcmd
             {
                 try
                 {
-                    if (!object.ReferenceEquals(ll, null))
-                    {
-                        ll.executePreCHooks(cmdln);
-                    }
+                    ll.executePreCHooks(cmdln);
                 }
                 catch (ThreadAbortException ex) { throw ex; }
                 catch (Exception)
@@ -185,10 +173,7 @@ namespace captainalm.calmcmd
             {
                 try
                 {
-                    if (!object.ReferenceEquals(ll, null))
-                    {
-                        ll.executePostCHooks(cmdln, objOut);
-                    }
+                    ll.executePostCHooks(cmdln, objOut);
                 }
                 catch (ThreadAbortException ex) { throw ex; }
                 catch (Exception)
@@ -238,10 +223,7 @@ namespace captainalm.calmcmd
                 {
                     try
                     {
-                        if (!object.ReferenceEquals(ll, null))
-                        {
-                            return ll.getHookHolder();
-                        }
+                        return ll.getHookHolder();
                     }
                     catch (ThreadAbortException ex) { throw ex; }
                     catch (Exception)
@@ -265,10 +247,7 @@ namespace captainalm.calmcmd
                 {
                     try
                     {
-                        if (!object.ReferenceEquals(ll, null))
-                        {
-                            return ll.hookRunnerHolder;
-                        }
+                        return ll.hookRunnerHolder;
                     }
                     catch (ThreadAbortException ex) { throw ex; }
                     catch (Exception)
@@ -285,10 +264,7 @@ namespace captainalm.calmcmd
                 {
                     try
                     {
-                        if (!object.ReferenceEquals(ll, null))
-                        {
-                            ll.hookRunnerHolder = value;
-                        }
+                        ll.hookRunnerHolder = value;
                     }
                     catch (ThreadAbortException ex) { throw ex; }
                     catch (Exception)
@@ -309,22 +285,15 @@ namespace captainalm.calmcmd
                 if ((!lav.HasValue) || lav == false) return false;
                 lock (slockll)
                 {
-                    if (!object.ReferenceEquals(ll, null))
-                    {
-                        return ll.RegisterFirstLegacySyntaxesToStandardLibrary;
-                    }
+                    return ll.RegisterFirstLegacySyntaxesToStandardLibrary;
                 }
-                return false;
             }
             set
             {
                 if ((!lav.HasValue) || lav == false) return;
                 lock (slockll)
                 {
-                    if (!object.ReferenceEquals(ll, null))
-                    {
-                        ll.RegisterFirstLegacySyntaxesToStandardLibrary = value;
-                    }
+                    ll.RegisterFirstLegacySyntaxesToStandardLibrary = value;
                 }
             }
         }
@@ -339,12 +308,8 @@ namespace captainalm.calmcmd
                 if ((!lav.HasValue) || lav == false) return false;
                 lock (slockll)
                 {
-                    if (!object.ReferenceEquals(ll, null))
-                    {
-                        return ll.RegisterFirstLegacyCommandsToStandardLibrary;
-                    }
+                    return ll.RegisterFirstLegacyCommandsToStandardLibrary;
                 }
-                return false;
             }
             set
             {
@@ -370,10 +335,7 @@ namespace captainalm.calmcmd
             {
                 try
                 {
-                    if (!object.ReferenceEquals(ll, null))
-                    {
-                        ll.syncManipulatorValues();
-                    }
+                    ll.syncManipulatorValues();
                 }
                 catch (ThreadAbortException ex) { throw ex; }
                 catch (Exception) {
@@ -406,10 +368,7 @@ namespace captainalm.calmcmd
                 {
                     try
                     {
-                        if (!object.ReferenceEquals(ll, null))
-                        {
-                            toret &= ll.loadAssembly(assemblyIn);
-                        }
+                        toret &= ll.loadAssembly(assemblyIn);
                     }
                     catch (ThreadAbortException ex) { throw ex; }
                     catch (Exception)

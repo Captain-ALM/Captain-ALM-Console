@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cnshare", "cnshare\cnshare.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CaptainALMConsole", "CaptainALMConsole\CaptainALMConsole.csproj", "{A3619FE3-E0F3-4290-8EFD-8DF5624ECAED}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test-Captain-ALM-Console", "Test-Captain-ALM-Console\Test-Captain-ALM-Console.csproj", "{327DED0D-6F4C-40D8-A452-A7B939B325A9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{A3619FE3-E0F3-4290-8EFD-8DF5624ECAED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A3619FE3-E0F3-4290-8EFD-8DF5624ECAED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A3619FE3-E0F3-4290-8EFD-8DF5624ECAED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{327DED0D-6F4C-40D8-A452-A7B939B325A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{327DED0D-6F4C-40D8-A452-A7B939B325A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{327DED0D-6F4C-40D8-A452-A7B939B325A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{327DED0D-6F4C-40D8-A452-A7B939B325A9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

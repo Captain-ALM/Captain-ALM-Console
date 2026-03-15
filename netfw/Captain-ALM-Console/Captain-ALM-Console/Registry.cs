@@ -54,8 +54,9 @@ namespace captainalm.calmcmd
             if (Object.ReferenceEquals(commandIn, null)) throw new ArgumentNullException("commandIn");
             lock (slockcommands)
             {
-                if (!_commands.Exists(delegate(ICommand x) { return NameComparer(x, commandIn); })) throw new CaptainALMConsoleException("No Command", new ArgumentException("commandIn"));
-                _commands.RemoveAll(delegate(ICommand x) { return NameComparer(x, commandIn); });
+                int r = _commands.RemoveAll(delegate(ICommand x) { return NameComparer(x, commandIn); });
+                if (r < 1)
+                    throw new CaptainALMConsoleException("No Command", new ArgumentException("commandIn"));
             }
         }
         /// <summary>
@@ -69,8 +70,9 @@ namespace captainalm.calmcmd
             if (Object.ReferenceEquals(syntaxIn, null)) throw new ArgumentNullException("syntaxIn");
             lock (slocksyntaxes)
             {
-                if (!_syntaxes.Exists(delegate(ISyntax x) { return NameComparer(x, syntaxIn); })) throw new CaptainALMConsoleException("No Syntax", new ArgumentException("syntaxIn"));
-                _syntaxes.RemoveAll(delegate(ISyntax x) { return NameComparer(x, syntaxIn); });
+                int r = _syntaxes.RemoveAll(delegate(ISyntax x) { return NameComparer(x, syntaxIn); });
+                if (r < 1)
+                    throw new CaptainALMConsoleException("No Syntax", new ArgumentException("syntaxIn"));
             }
         }
         /// <summary>

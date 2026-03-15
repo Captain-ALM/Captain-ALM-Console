@@ -178,14 +178,7 @@ namespace captainalm.calmcmd
         {
             lock (slocksvd)
             {
-                if (StringVariableDictionary.ContainsKey(name))
-                {
-                    StringVariableDictionary[name] = valueIn;
-                }
-                else
-                {
-                    StringVariableDictionary.Add(name, valueIn);
-                }
+                StringVariableDictionary[name] = valueIn;
             }
         }
         /// <summary>
@@ -224,14 +217,7 @@ namespace captainalm.calmcmd
         {
             lock (slockvd)
             {
-                if (VariableDictionary.ContainsKey(name))
-                {
-                    VariableDictionary[name] = valueIn;
-                }
-                else
-                {
-                    VariableDictionary.Add(name, valueIn);
-                }
+                VariableDictionary[name] = valueIn;
             }
         }
         /// <summary>
